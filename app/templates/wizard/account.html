@@ -1,0 +1,14 @@
+{% extends "wizard/layout.html" %}
+{% block step %}
+<h1>Create the first admin</h1>
+<p>This account manages users and settings. Once it exists, this setup link stops working.</p>
+<form method="post" action="/setup" class="stack">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <input type="hidden" name="token" value="{{ token }}">
+  <label>Email <input type="email" name="email" value="{{ form.email or '' }}" autocomplete="username" required></label>
+  <label>Your name <input name="display_name" value="{{ form.display_name or '' }}" required maxlength="120"></label>
+  <label>Password (at least 12 characters) <input type="password" name="password" minlength="12" autocomplete="new-password" required></label>
+  <label>Password again <input type="password" name="confirm" minlength="12" autocomplete="new-password" required></label>
+  <button type="submit" class="btn primary">Create admin and continue</button>
+</form>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Not found' if status == 404 else 'Something went wrong' }}{% endblock %}
+{% block main_class %}container narrow{% endblock %}
+{% block content %}
+{% if status == 404 %}
+<h1>Page not found</h1>
+<p>This page doesn't exist, or you don't have access to it.</p>
+{% elif status == 403 %}
+<h1>Not allowed</h1>
+<p>{{ detail or "You can't do that." }}</p>
+{% elif status == 429 %}
+<h1>Too many attempts</h1>
+<p>{{ detail or "Please wait a few minutes and try again." }}</p>
+{% else %}
+<h1>Something went wrong</h1>
+<p>{{ detail if detail and status < 500 else "Please try again." }}</p>
+{% endif %}
+{% endblock %}

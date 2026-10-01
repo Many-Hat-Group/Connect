@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Set up {{ brand.product_name }}{% endblock %}
+{% block main_class %}container narrow{% endblock %}
+{% block content %}
+<p class="muted">First-time setup</p>
+<ol class="steps" aria-label="Setup steps">
+  {% set labels = {'account': 'Admin account', 'mfa': 'Authenticator', 'brand': 'Branding', 'urls': 'Web addresses', 'integrations': 'TURN and RustDesk'} %}
+  {% for s in steps %}<li {% if s == step %}aria-current="step"{% endif %}>{{ labels[s] }}</li>{% endfor %}
+</ol>
+{% if error %}<p class="alert error" role="alert">{{ error }}</p>{% endif %}
+{% block step %}{% endblock %}
+{% endblock %}

@@ -3,7 +3,7 @@ COMPOSE ?= docker compose
 PY ?= .venv/bin/python
 PYTEST ?= .venv/bin/pytest
 
-.PHONY: up down logs ps build restore-test turn-check test test-unit test-integration test-e2e test-phase0 \
+.PHONY: up down logs ps build restore-test turn-check test-deps e2e-up e2e-down test test-unit test-integration test-e2e test-phase0 \
         phase0-up phase0-down backup check-vendor check-brand audit
 
 up:
@@ -46,4 +46,26 @@ phase0-down:
 test-phase0: check-vendor
 	cd tests/e2e && ../../$(PYTEST) -q test_phase0_vdo.py
 
-test: check-vendor test-phase0
+# Dev Postgres and Redis for unit/integration tests (ports 55432, 56379).
+test-deps:
+	@docker start connect-devpg connect-devredis >/dev/null 2>&1 || { \
+	  docker run -d --name connect-devpg -e POSTGRES_USER=connect -e POSTGRES_PASSWORD=connect -e POSTGRES_DB=connect -p 127.0.0.1:55432:5432 postgres:16.10-alpine >/dev/null; \
+	  docker run -d --name connect-devredis -p 127.0.0.1:56379:6379 redis:7.4.6-alpine >/dev/null; sleep 4; }
+
+test-unit:
+	$(PYTEST) -q tests/unit
+
+test-integration: test-deps
+	$(PYTEST) -q tests/integration
+
+# E2E against the real containers (tests/e2e/stack.sh) through a TLS edge stand-in.
+e2e-up:
+	tests/e2e/stack.sh up -d --no-build
+
+e2e-down:
+	tests/e2e/stack.sh down -v
+
+test-e2e:
+	cd tests/e2e && ../../$(PYTEST) -q -p no:cacheprovider $(filter-out test_phase0_vdo.py,$(notdir $(wildcard tests/e2e/test_*.py)))
+
+test: check-vendor test-unit test-integration

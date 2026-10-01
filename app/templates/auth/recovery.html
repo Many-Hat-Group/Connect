@@ -1,0 +1,8 @@
+{% extends "auth/layout.html" %}
+{% block title %}Recovery codes{% endblock %}
+{% block content %}
+<h1>Save your recovery codes</h1>
+<p>Each code works once if you lose your phone. Store them somewhere safe, such as your password manager. They won't be shown again.</p>
+<ol class="codes">{% for c in codes %}<li><code>{{ c }}</code></li>{% endfor %}</ol>
+<p><a class="btn primary" href="{{ next }}">I've saved them</a></p>
+{% endblock %}

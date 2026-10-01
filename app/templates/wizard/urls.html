@@ -1,0 +1,11 @@
+{% extends "wizard/layout.html" %}
+{% block step %}
+<h1>Web addresses</h1>
+<form method="post" action="/setup/urls" class="stack">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <label>Connect address (this site) <input type="url" name="connect_url" value="{{ u.connect_url }}" placeholder="https://" required></label>
+  <label>Help page address <input type="url" name="help_url" value="{{ u.help_url }}" placeholder="https://"></label>
+  <label>Privacy policy address <input type="url" name="privacy_url" value="{{ u.privacy_url }}" placeholder="https://"></label>
+  <button type="submit" class="btn primary">Save and continue</button>
+</form>
+{% endblock %}

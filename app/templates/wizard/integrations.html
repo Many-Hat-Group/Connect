@@ -1,0 +1,14 @@
+{% extends "wizard/layout.html" %}
+{% block step %}
+<h1>TURN and RustDesk</h1>
+<form method="post" action="/setup/integrations" class="stack">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <label>TURN host name <input name="turn_host" value="{{ t.host }}" required></label>
+  <fieldset><legend>RustDesk server (you can fill this in later)</legend>
+    <label>ID server host (hbbs) <input name="rustdesk_host" value="{{ r.host }}"></label>
+    <label>Public key <input name="rustdesk_key" value="{{ r.key }}" spellcheck="false"></label>
+    <label>Relay host (hbbr, if different) <input name="rustdesk_relay" value="{{ r.relay }}"></label>
+  </fieldset>
+  <button type="submit" class="btn primary">Finish setup</button>
+</form>
+{% endblock %}

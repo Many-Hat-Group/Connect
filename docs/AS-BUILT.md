@@ -63,6 +63,20 @@ Simulated LXC: a fresh copy of the repository in the build container, `install.s
 
 Backups: `make backup` wrote a custom-format dump; `make restore-test FILE=...` restored it into a scratch database (the full restore drill is a go-live item).
 
+### Phase 2: App skeleton, auth, roles, setup wizard (2026-10-01)
+
+| Acceptance check | Result | Evidence |
+|---|---|---|
+| A user cannot reach any portal page without completing TOTP enrolment | PASS | `tests/integration/test_phase2_auth.py::test_password_ok_but_no_totp_cannot_reach_portal` (pages and portal websocket), `test_mfa_pending_cannot_reach_portal`, `test_enrolment_flow_then_portal` |
+| Wizard is unreachable without the token and permanently disabled after completion | PASS | `test_wizard_requires_token_and_locks_after_admin` (404 without or with a wrong token; token dead for everyone once the admin exists; later steps 404 after finishing); browser run `tests/e2e/test_phase2_portal.py::test_wizard_end_to_end_in_browser` |
+| Login rate limiting and lockout work and are audited | PASS | `test_login_rate_limit_per_account_and_audit` (5 per account), `test_login_rate_limit_per_ip` (10 per IP), `test_mfa_failures_lock_out`; `auth.login_failed`, `auth.mfa_failed`, `auth.locked_out` rows |
+| Unit tests for password hashing, TOTP, recovery codes and CSRF pass | PASS | `tests/unit/test_auth_primitives.py`, `tests/unit/test_csrf.py` |
+| Changing the brand colour in settings changes customer and portal pages without a code change | PASS | `test_brand_colour_changes_pages_without_code_change` (`/brand.css` served from settings); browser check of the computed top bar colour after the wizard |
+
+Also covered: TOTP replay rejected, single-use recovery codes, session id rotation at each privilege change, `__Host-connect` cookie flags (Secure, HttpOnly, SameSite=Lax, Path=/, no Domain), admin user management with the last-admin guard, deactivated users signed out immediately, strict CSP on app pages with zero violations in the browser, Redis pub/sub fan-out across processes (`tests/integration/test_hub.py`).
+
+Totals: 28 unit, 20 integration, 2 browser e2e.
+
 ## Deviations and decisions
 
 | # | Playbook said | Built | Why |
@@ -81,6 +95,9 @@ Backups: `make backup` wrote a custom-format dump; `make restore-test FILE=...` 
 | D13 | Certbot DNS-01 (provider unspecified) | `certbot/dns-cloudflare:v5.8.0` | "DNS only, never proxied" implies Cloudflare. Swap the image and plugin if the zone is elsewhere. coturn restarts on the first certificate and reloads (SIGUSR2) on renewals. |
 | D14 | (not specified) | Docker network dynamic addresses limited to `172.31.250.128/25` | Stops dynamic containers taking the router's fixed address. |
 | D15 | Data model as listed | Added `users.must_change_password`, `join_codes.id`, `join_codes.created_at`, `join_codes.revoked`, `rustdesk_releases.error`, status `archived` | Needed for admin password resets, code revocation and sync error reporting. |
+| D16 | (not specified) | Brand colours are served as `/brand.css` (CSS variables) | Lets the strict CSP forbid inline styles. |
+| D17 | Server-side sessions | Also used before login (stage `anon`) to hold the login CSRF token | CSRF on the login and wizard forms. |
+| D18 | Wizard "disabled once the first admin exists" | Token step disabled when an admin exists; the remaining wizard steps (branding, URLs, TURN, RustDesk) are open only to that signed-in admin until setup is marked complete | The wizard has to continue after the admin is created. |
 | D11 | Docker Hub images | Same official images; this build container pulled them via `mirror.gcr.io` because of Docker Hub rate limits | No effect on the LXC. |
 
 ## Decisions recorded

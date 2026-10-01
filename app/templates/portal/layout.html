@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block home_href %}/portal{% endblock %}
+{% block body_class %}portal{% endblock %}
+{% block nav %}
+<nav class="nav" aria-label="Main">
+  <a href="/portal" {% if path == '/portal' %}aria-current="page"{% endif %}>Dashboard</a>
+  {% if user and user.role == 'admin' %}
+  <a href="/admin/sessions" {% if path.startswith('/admin/sessions') %}aria-current="page"{% endif %}>All sessions</a>
+  <a href="/admin/audit" {% if path.startswith('/admin/audit') %}aria-current="page"{% endif %}>Audit log</a>
+  <a href="/admin/users" {% if path.startswith('/admin/users') %}aria-current="page"{% endif %}>Users</a>
+  <a href="/admin/settings" {% if path.startswith('/admin/settings') or path.startswith('/admin/branding') or path.startswith('/admin/rustdesk') or path.startswith('/admin/health') %}aria-current="page"{% endif %}>Settings</a>
+  {% endif %}
+  <span class="nav-spacer"></span>
+  <button type="button" class="btn-link" id="notif-toggle" aria-haspopup="true" aria-expanded="false" hidden>Notifications <span class="badge" id="notif-count" hidden>0</span></button>
+  <a href="/account">{{ user.display_name if user else '' }}</a>
+  <form method="post" action="/logout" class="inline">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <button type="submit" class="btn-link">Sign out</button>
+  </form>
+</nav>
+{% endblock %}
+{% block scripts %}
+<div id="toasts" class="toasts" aria-live="polite"></div>
+<div id="notif-panel" class="notif-panel" hidden><h2>Notifications</h2><ul id="notif-list"></ul></div>
+<script type="module" src="/static/js/portal.js?v={{ static_v }}"></script>
+{% block page_scripts %}{% endblock %}
+{% endblock %}

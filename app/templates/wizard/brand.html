@@ -1,0 +1,19 @@
+{% extends "wizard/layout.html" %}
+{% block step %}
+<h1>Branding</h1>
+<p>Shown to customers and staff. You can change all of this later in Settings.</p>
+{% if warnings %}<div class="alert" role="status"><p>Saved. Please check these before you carry on:</p><ul>{% for w in warnings %}<li>{{ w }}</li>{% endfor %}</ul><p><a class="btn" href="/setup/urls">Carry on anyway</a></p></div>{% endif %}
+<form method="post" action="/setup/brand" enctype="multipart/form-data" class="stack">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <label>Product name <input name="product_name" value="{{ b.product_name }}" maxlength="60" required></label>
+  <label>Company name <input name="company_name" value="{{ b.company_name }}" maxlength="120" required></label>
+  <label>Short name <input name="company_short" value="{{ b.company_short }}" maxlength="20"></label>
+  <div class="row">
+    <label>Primary colour <input type="color" name="primary_colour" value="{{ b.primary_colour }}"></label>
+    <label>Accent colour <input type="color" name="accent_colour" value="{{ b.accent_colour }}"></label>
+  </div>
+  <label>Logo (PNG, JPEG or SVG, up to 2 MB) <input type="file" name="logo" accept="image/png,image/jpeg,image/svg+xml"></label>
+  {% if b.logo_url %}<p>Current logo: <img src="{{ b.logo_url }}" alt="" class="logo-preview"></p>{% endif %}
+  <button type="submit" class="btn primary">Save and continue</button>
+</form>
+{% endblock %}

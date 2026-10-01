@@ -1,0 +1,46 @@
+{% extends "portal/layout.html" %}
+{% block title %}Users{% endblock %}
+{% block content %}
+<h1>Users</h1>
+{% if error %}<p class="alert error" role="alert">{{ error }}</p>{% endif %}
+{% if notice %}<div class="alert ok" role="status"><p><strong>{{ notice.title }}</strong></p><p>{{ notice.body }}</p>{% if notice.secret %}<p><code class="secret" data-testid="temp-password">{{ notice.secret }}</code></p>{% endif %}</div>{% endif %}
+<table class="table">
+  <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Authenticator</th><th>Last sign in</th><th><span class="sr-only">Actions</span></th></tr></thead>
+  <tbody>
+  {% for u in users %}
+  <tr class="{{ '' if u.is_active else 'inactive' }}">
+    <td>{{ u.display_name }}</td><td>{{ u.email }}</td>
+    <td>
+      <form method="post" action="/admin/users/{{ u.id }}" class="inline">
+        <input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="action" value="role">
+        <select name="role" aria-label="Role for {{ u.display_name }}">
+          <option value="tech" {% if u.role == 'tech' %}selected{% endif %}>Tech</option>
+          <option value="admin" {% if u.role == 'admin' %}selected{% endif %}>Admin</option>
+        </select>
+        <button type="submit" class="btn small">Set</button>
+      </form>
+    </td>
+    <td>{{ 'Active' if u.is_active else 'Deactivated' }}</td>
+    <td>{{ 'Set up' if u.totp_enrolled_at else 'Not set up' }}</td>
+    <td>{% if u.last_login_at %}<time datetime="{{ u.last_login_at.isoformat() }}" class="localtime">{{ u.last_login_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>{% else %}Never{% endif %}</td>
+    <td class="actions">
+      {% for action, label in ([('deactivate', 'Deactivate')] if u.is_active else [('activate', 'Activate')]) + [('reset_password', 'Reset password'), ('reset_mfa', 'Reset authenticator')] %}
+      <form method="post" action="/admin/users/{{ u.id }}" class="inline">
+        <input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="action" value="{{ action }}">
+        <button type="submit" class="btn small">{{ label }}</button>
+      </form>
+      {% endfor %}
+    </td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+<h2>Add a user</h2>
+<form method="post" action="/admin/users" class="stack row">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <label>Email <input type="email" name="email" required></label>
+  <label>Display name <input name="display_name" required maxlength="120"></label>
+  <label>Role <select name="role"><option value="tech">Tech</option><option value="admin">Admin</option></select></label>
+  <button type="submit" class="btn primary">Add user</button>
+</form>
+{% endblock %}

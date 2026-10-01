@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ brand.product_name }}{% endblock %} | {{ brand.company_name }}</title>
+  <link rel="icon" href="{{ brand.favicon_url or '/static/icons/favicon.svg' }}">
+  <link rel="stylesheet" href="/static/css/app.css?v={{ static_v }}">
+  <link rel="stylesheet" href="/brand.css?v={{ static_v }}">
+  <meta name="htmx-config" content='{"includeIndicatorStyles":false,"allowEval":false,"allowScriptTags":false}'>
+  <script src="/static/vendor/htmx-2.0.11.min.js" defer></script>
+  {% block head %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}" data-csrf="{{ csrf }}" hx-headers='{"X-CSRF-Token": "{{ csrf }}"}'>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="topbar">
+    <a class="brand" href="{% block home_href %}/{% endblock %}">
+      {% if brand.logo_url %}<img src="{{ brand.logo_url }}" alt="{{ brand.company_name }}" class="brand-logo">{% else %}<span class="brand-mark">{{ brand.company_short or brand.company_name }}</span>{% endif %}
+      <span class="brand-product">{{ brand.product_name }}</span>
+    </a>
+    {% block nav %}{% endblock %}
+  </header>
+  <main id="main" class="{% block main_class %}container{% endblock %}">
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="footer">
+    <span>{{ brand.footer_text or brand.company_name }}</span>
+    {% if brand.support_phone %}<span>Phone <a href="tel:{{ brand.support_phone|replace(' ', '') }}">{{ brand.support_phone }}</a></span>{% endif %}
+    {% if brand.support_email %}<span><a href="mailto:{{ brand.support_email }}">{{ brand.support_email }}</a></span>{% endif %}
+    {% if urls.privacy_url %}<a href="{{ urls.privacy_url }}" rel="noopener">Privacy</a>{% endif %}
+    <a href="/licences">Licences</a>
+  </footer>
+  {% block scripts %}{% endblock %}
+</body>
+</html>
