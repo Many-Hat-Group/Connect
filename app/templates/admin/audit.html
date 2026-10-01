@@ -1,0 +1,49 @@
+{% extends "portal/layout.html" %}
+{% block title %}Audit log{% endblock %}
+{% block main_class %}container wide{% endblock %}
+{% block content %}
+<h1>Audit log</h1>
+<form method="get" class="stack row filters" id="audit-filters">
+  <input type="hidden" name="tz" id="tz" value="{{ params.tz }}">
+  <label>From <input type="date" name="from" value="{{ params['from'] }}"></label>
+  <label>To <input type="date" name="to" value="{{ params.to }}"></label>
+  <label>Tech
+    <select name="tech"><option value="">Anyone</option>
+      {% for u in users %}<option value="{{ u.id }}" {% if params.tech == u.id|string %}selected{% endif %}>{{ u.display_name }}</option>{% endfor %}
+    </select>
+  </label>
+  <label>Event
+    <select name="type"><option value="">Any</option>
+      {% for g in ['auth.*', 'code.*', 'session.*', 'user.*', 'settings.*', 'rustdesk.*'] %}<option value="{{ g }}" {% if params.type == g %}selected{% endif %}>All {{ g[:-2] }}</option>{% endfor %}
+      {% for t in types %}<option value="{{ t }}" {% if params.type == t %}selected{% endif %}>{{ t }}</option>{% endfor %}
+    </select>
+  </label>
+  <label>Session ID <input name="session" value="{{ params.session }}" size="12"></label>
+  <label>Customer company <input name="company" value="{{ params.company }}"></label>
+  <button class="btn" type="submit">Filter</button>
+  <a class="btn" id="csv-link" href="/admin/audit.csv?{{ request.query_params }}">Export CSV</a>
+</form>
+<div class="table-wrap">
+<table class="table audit">
+  <thead><tr><th>Time</th><th>Event</th><th>Actor</th><th>Session</th><th>Company</th><th>IP</th><th>Details</th></tr></thead>
+  <tbody>
+  {% for ev, company, cname in rows %}
+  <tr>
+    <td><time class="localtime" datetime="{{ ev.ts.isoformat() }}">{{ ev.ts.strftime('%Y-%m-%d %H:%M:%S') }} UTC</time></td>
+    <td><code>{{ ev.event_type }}</code></td>
+    <td>{{ names.get(ev.actor_id or '', (ev.data or {}).get('actor_name') or ev.actor_type) }}{% if ev.actor_type == 'customer' %} (customer){% endif %}</td>
+    <td>{% if ev.session_id %}<a href="/admin/audit?session={{ ev.session_id }}">{{ ev.session_id|string|truncate(8, True, '') }}</a>{% endif %}</td>
+    <td>{{ company or '' }}</td>
+    <td>{{ ev.ip or '' }}</td>
+    <td class="details">{{ ev.data|tojson }}</td>
+  </tr>
+  {% else %}<tr><td colspan="7" class="muted">No events match.</td></tr>{% endfor %}
+  </tbody>
+</table>
+</div>
+<p class="row">
+  {% if page > 1 %}<a class="btn small" href="?{{ request.query_params|string|replace('page=' ~ page, '') }}&page={{ page - 1 }}">Newer</a>{% endif %}
+  {% if more %}<a class="btn small" href="?{{ request.query_params|string|replace('page=' ~ page, '') }}&page={{ page + 1 }}">Older</a>{% endif %}
+</p>
+{% endblock %}
+{% block page_scripts %}<script type="module" src="/static/js/audit.js"></script>{% endblock %}

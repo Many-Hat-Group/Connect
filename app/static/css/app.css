@@ -199,3 +199,4 @@ dialog::backdrop { background: rgba(0,0,0,.4); }
 .share-body { position: absolute; right: 0; bottom: 3.2rem; width: 340px; z-index: 20; display: flex; flex-direction: column; gap: .6rem; }
 .access-list { margin: 0; padding-left: 1.1rem; font-size: .9rem; }
 .filters { margin-bottom: 1rem; }
+.audit .details { font-family: ui-monospace, Consolas, monospace; font-size: .8rem; max-width: 420px; word-break: break-word; }

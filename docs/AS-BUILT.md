@@ -121,6 +121,17 @@ Also: "Click to enable sounds" prompt on every portal page (one per page, tested
 
 Known limitation: revoking access removes the tech's views, signal tokens and closes their viewer, but an already-established peer-to-peer media connection is closed by their own page; a tampered browser could keep it until it drops. Kill ends it for everyone. Techs are trusted staff, so this is acceptable for now.
 
+### Phase 6: Lifecycle, timeouts, audit log (2026-10-01)
+
+| Acceptance check | Result | Evidence |
+|---|---|---|
+| Integration tests with shortened timeouts cover every `end_reason` | PASS | `tests/integration/test_phase6_lifecycle.py`: `tech_absent_timeout`, `customer_lost_timeout`, `code_expired` through the sweeper with 2 s timeouts; `customer_ended`, `tech_ended`, `tech_killed`, `admin_ended` through their own paths (`test_every_end_reason_reachable`); ending revokes customer and signal tokens |
+| A tech closing the portal ends their private session after the timeout. A second tech with access keeps it alive | PASS | `test_tech_absent_timeout`, `test_second_tech_with_access_keeps_it_alive` (a tech WITHOUT access does not keep it alive); browser run with the real worker `tests/e2e/test_phase6_timeouts.py` (countdown shown, then "ended because your technician wasn't connected") |
+| CSV export matches filters and opens cleanly in Excel | PASS (structure), PENDING (manual open in Excel) | `test_csv_export_matches_filters_and_is_excel_friendly`: UTF-8 BOM, CRLF line ends, standard quoting, filters by tech, event type and company, non-Latin text kept, formula injection neutralised (`'=...`); `audit.exported` audited |
+| Retention job deletes only records older than the threshold | PASS | `test_retention_deletes_only_old_records` (366-day records deleted, 364-day kept, non-ended sessions never deleted) |
+
+Also: absence clocks live in Redis ("absent since"), so a worker restart does not reset them; a customer coming back (for example after the Mac "quit and reopen" step) resets the clock (`test_customer_returning_resets_the_clock`); customer countdown only in the last `tech_absent_warning_seconds`.
+
 ## Deviations and decisions
 
 | # | Playbook said | Built | Why |
