@@ -1,0 +1,56 @@
+# Default settings for a fresh install. This is the ONLY file (with .env)
+# where brand-specific values may appear. Everything here is copied into the
+# `settings` table on first start and is editable in the admin pages.
+
+branding:
+  product_name: "Connect"
+  company_name: "Many Hat Services"
+  company_short: "MHS"
+  logo_url: ""            # empty = text logo; uploads go to /media/branding/
+  favicon_url: ""
+  primary_colour: "#1f4e79"
+  accent_colour: "#f0a020"
+  support_phone: "1300 000 000"
+  support_email: "support@mhits.au"
+  footer_text: "Many Hat Services"
+
+urls:
+  connect_url: "https://connect.mhits.au"
+  help_url: "https://help.mhits.au"
+  privacy_url: "https://mhits.au/privacy"
+
+turn:
+  host: "turn.mhits.au"
+  credential_ttl_seconds: 14400
+
+rustdesk:
+  host: ""
+  key: ""
+  relay: ""
+  sync_interval_hours: 6
+  keep_versions: 2
+
+timeouts:
+  code_ttl_seconds: 600
+  tech_absent_seconds: 300
+  customer_lost_seconds: 120
+  tech_absent_warning_seconds: 60
+  heartbeat_seconds: 10
+  presence_ttl_seconds: 30
+
+limits:
+  code_fail_per_ip: 5
+  code_fail_window_seconds: 900
+  code_lockout_seconds: 900
+  code_fail_global_per_hour: 50
+  login_fail_per_ip: 10
+  login_fail_per_account: 5
+  login_window_seconds: 900
+  login_lockout_seconds: 900
+  viewers_per_stream: 3
+  max_screen_streams: 2
+  kill_block_seconds: 3600
+
+retention:
+  audit_days: 365
+  ended_session_days: 365

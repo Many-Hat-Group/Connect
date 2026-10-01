@@ -16,12 +16,30 @@ services:
 
   app:
     image: python:3.12.11-slim-bookworm
+    build: !reset null
+    depends_on: !reset []
     command: ["python", "-u", "/stub/authstub.py"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/spike/frame.html')"]
+      interval: 5s
+      retries: 10
     environment:
       SPIKE_TOKENS: ${SPIKE_TOKENS:-pubtoken,viewtoken}
     volumes:
       - ./tests/phase0:/stub:ro
     networks: [internal]
+
+  # Not needed for the spike.
+  worker:
+    profiles: [unused]
+  backup:
+    profiles: [unused]
+  certbot:
+    profiles: [unused]
+  postgres:
+    profiles: [unused]
+  redis:
+    profiles: [unused]
 
   coturn:
     volumes:

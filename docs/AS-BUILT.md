@@ -16,8 +16,8 @@ Update this file as each phase completes, then upload it to the wiki.
 | App version / git commit | see `git log` (branch `claude/loving-newton-v7l17n`) |
 | RustDesk server host and relay | _pending (RustDesk server playbook)_ |
 | Current RustDesk client version | _pending (Phase 7)_ |
-| Cert renewal method for turn.mhits.au | certbot DNS-01 (Phase 1) |
-| Backup job and schedule | _pending_ |
+| Cert renewal method for turn.mhits.au | `certbot/dns-cloudflare:v5.8.0`, DNS-01, renew check every 12 h, copied to the `turncerts` volume, coturn reloads |
+| Backup job and schedule | `backup` service: `pg_dump` custom format daily at 02:30 UTC, 14-day retention, `backups` volume. Proxmox Backup job: _pending_ |
 | Go-live date and confirmations | _not yet_ |
 | Deviations from this playbook | see below |
 
@@ -28,6 +28,10 @@ Update this file as each phase completes, then upload it to the wiki.
 | router | `nginx:1.28.0-alpine` |
 | signal | built from `node:22.20.0-alpine` |
 | coturn | `coturn/coturn:4.7.0` |
+| app, worker | built from `python:3.12.11-slim-bookworm` (`requirements.lock`) |
+| postgres, backup | `postgres:16.10-alpine` |
+| redis | `redis:7.4.6-alpine` |
+| certbot | `certbot/dns-cloudflare:v5.8.0` |
 
 ## Phase results
 
@@ -45,6 +49,20 @@ Environment: Claude Code cloud container (not the LXC). Docker 29.6, Chromium 14
 
 Full suite: `make test-phase0`: 14 passed.
 
+### Phase 1: LXC and base platform (2026-10-01)
+
+Simulated LXC: a fresh copy of the repository in the build container, `install.sh` run with `SKIP_DOCKER_INSTALL=1 SKIP_BUILD=1` (Docker already present; images pre-built because this container reaches registries through a TLS-intercepting proxy) and a TLS edge stand-in (`tests/lxc-sim/compose.sim.yml`). Not yet run on the real LXC.
+
+| Acceptance check | Result | Evidence |
+|---|---|---|
+| `install.sh` on a clean LXC brings everything up healthy with no manual steps beyond `.env` values Pierce supplies | PASS (simulated), PENDING (LXC) | All 10 services healthy; prints the one-time setup URL. `.env` mode 600, secrets generated. |
+| From outside the LXC, only 8080 (internal NIC) and the TURN ports respond | PASS (simulated), PENDING (LXC external scan) | `tests/integration/listening_ports.py`: only 3478 tcp/udp, the relay range, and 8080 on `ROUTER_BIND_IP`. Postgres, Redis, app and signal have no published ports. In-LXC `DOCKER-USER` rule drops 8080 from anything but the proxy IP. 5349 opens once certbot has a certificate. |
+| `turnutils_uclient` gets relay candidates using an ephemeral credential | PASS | `tests/integration/turn_check.sh` (`make turn-check`) |
+| A TURN allocation attempt to a private IP peer is refused | PASS | Same script: 10/8, 172.16/12, 192.168/16, 127/8, 100.64/10, 169.254/16, 0/8, 198.18/15 all return 403 Forbidden IP; bad and expired credentials refused |
+| Re-running `install.sh` is safe (idempotent) | PASS | Second run: same secrets and setup token, firewall rule not duplicated, stack unchanged and healthy |
+
+Backups: `make backup` wrote a custom-format dump; `make restore-test FILE=...` restored it into a scratch database (the full restore drill is a go-live item).
+
 ## Deviations and decisions
 
 | # | Playbook said | Built | Why |
@@ -59,7 +77,18 @@ Full suite: `make test-phase0`: 14 passed.
 | D8 | (not specified) | `/vdo/` refuses top-level navigation, sends `X-Frame-Options: SAMEORIGIN` and `Access-Control-Allow-Origin: *` | Same finding as D7. |
 | D9 | `autostart` for screen share | No `autostart` for screen share in production | `getDisplayMedia` needs a click inside the iframe on real browsers. |
 | D10 | uvicorn `--forwarded-allow-ips=<PROXY_IP>` | Router trusts the edge proxy IP (`set_real_ip_from`); uvicorn trusts only the router's fixed Docker IP | The app's direct peer is the router, not the edge proxy. |
+| D12 | Nightly `pg_dump` via cron in the worker | Separate `backup` service on the `postgres:16.10-alpine` image | Debian bookworm's `pg_dump` is v15 and refuses a v16 server; the postgres image always matches. |
+| D13 | Certbot DNS-01 (provider unspecified) | `certbot/dns-cloudflare:v5.8.0` | "DNS only, never proxied" implies Cloudflare. Swap the image and plugin if the zone is elsewhere. coturn restarts on the first certificate and reloads (SIGUSR2) on renewals. |
+| D14 | (not specified) | Docker network dynamic addresses limited to `172.31.250.128/25` | Stops dynamic containers taking the router's fixed address. |
+| D15 | Data model as listed | Added `users.must_change_password`, `join_codes.id`, `join_codes.created_at`, `join_codes.revoked`, `rustdesk_releases.error`, status `archived` | Needed for admin password resets, code revocation and sync error reporting. |
 | D11 | Docker Hub images | Same official images; this build container pulled them via `mirror.gcr.io` because of Docker Hub rate limits | No effect on the LXC. |
+
+## Decisions recorded
+
+| Date | Decision | By |
+|---|---|---|
+| 2026-10-01 | Accepted the VDO.Ninja same-origin finding with the Phase 0 mitigations (sandboxed tech viewer, framing locked down, top-level navigation refused). A separate VDO hostname is logged as a later hardening step. | Pierce |
+| 2026-10-01 | Continue building Phases 1 to 9 in the cloud build container. LXC-only acceptance checks are marked PENDING (LXC) until run on the real LXC. Nothing is made public. | Pierce |
 
 ## Open items for Pierce
 

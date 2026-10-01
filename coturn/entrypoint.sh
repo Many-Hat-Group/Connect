@@ -38,4 +38,17 @@ if [ ! -s "$TURN_CERT_FILE" ]; then
   echo "coturn: TLS certificate $TURN_CERT_FILE not present yet; 5349 will be unavailable until certbot issues it" >&2
 fi
 
+# Reload TLS certificates when certbot replaces them (coturn: SIGUSR2).
+(
+  last=$(stat -c %Y "$TURN_CERT_FILE" 2>/dev/null || echo none)
+  while sleep 300; do
+    cur=$(stat -c %Y "$TURN_CERT_FILE" 2>/dev/null || echo none)
+    if [ "$cur" != "$last" ]; then
+      # First certificate: restart so the TLS listener opens. Renewal: reload.
+      if [ "$last" = "none" ]; then kill -TERM 1; else kill -USR2 1; fi 2>/dev/null || true
+    fi
+    last=$cur
+  done
+) &
+
 exec turnserver -c "$out" "$@"
