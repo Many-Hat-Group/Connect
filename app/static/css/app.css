@@ -200,3 +200,6 @@ dialog::backdrop { background: rgba(0,0,0,.4); }
 .access-list { margin: 0; padding-left: 1.1rem; font-size: .9rem; }
 .filters { margin-bottom: 1rem; }
 .audit .details { font-family: ui-monospace, Consolas, monospace; font-size: .8rem; max-width: 420px; word-break: break-word; }
+.subnav { display: flex; gap: 1rem; margin-bottom: .5rem; flex-wrap: wrap; }
+.subnav a { text-decoration: none; padding: .2rem 0; border-bottom: 2px solid transparent; }
+.subnav a[aria-current] { border-bottom-color: var(--brand-primary); font-weight: 600; }

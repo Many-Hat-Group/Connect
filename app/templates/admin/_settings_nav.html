@@ -1,0 +1,6 @@
+<nav class="subnav" aria-label="Settings">
+  <a href="/admin/settings" {% if path == '/admin/settings' %}aria-current="page"{% endif %}>General</a>
+  <a href="/admin/branding" {% if path == '/admin/branding' %}aria-current="page"{% endif %}>Branding</a>
+  <a href="/admin/rustdesk" {% if path == '/admin/rustdesk' %}aria-current="page"{% endif %}>RustDesk</a>
+  <a href="/admin/health" {% if path == '/admin/health' %}aria-current="page"{% endif %}>System health</a>
+</nav>

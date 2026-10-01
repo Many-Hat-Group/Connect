@@ -140,6 +140,16 @@ muteBtn.addEventListener("click", () => {
 volume.addEventListener("input", () => { if (!muted && viewer) viewer.setVolume(Number(volume.value) / 100); });
 document.getElementById("fullscreen").addEventListener("click", () => viewer && viewer.fullscreen());
 
+// ---------------------------------------------------------------- remote control
+const rdBtn = document.getElementById("rustdesk");
+rdBtn.hidden = false;
+rdBtn.addEventListener("click", async () => {
+  try {
+    const r = await api("POST", `/api/sessions/${sessionId}/rustdesk`);
+    notify({ title: "Remote control requested", body: r.choice && r.choice.available === false ? r.choice.reason : "The customer sees download steps now.", panel: false });
+  } catch (e) { notify({ title: "Couldn't request remote control", body: e.message, panel: false }); }
+});
+
 // ---------------------------------------------------------------- end and kill
 document.getElementById("end").addEventListener("click", async () => {
   if (!confirm("End this session for the customer?")) return;

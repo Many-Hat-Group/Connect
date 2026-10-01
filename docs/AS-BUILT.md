@@ -132,6 +132,20 @@ Known limitation: revoking access removes the tech's views, signal tokens and cl
 
 Also: absence clocks live in Redis ("absent since"), so a worker restart does not reset them; a customer coming back (for example after the Mac "quit and reopen" step) resets the clock (`test_customer_returning_resets_the_clock`); customer countdown only in the last `tech_absent_warning_seconds`.
 
+### Phase 7: RustDesk mirror and remote-control prompt (2026-10-01)
+
+This build container cannot reach the GitHub releases API (its proxy only serves git reads for unattached repositories), so sync is tested against a fake GitHub (httpx `MockTransport`) that serves the 1.5.0 asset names. Asset names were taken from RustDesk 1.5.0's own `.github/workflows/flutter-build.yml`. The Windows filename format was taken from RustDesk 1.5.0's `src/custom_server.rs`; the current online docs no longer describe it.
+
+| Acceptance check | Result | Evidence |
+|---|---|---|
+| Sync downloads the current stable release, verifies hashes, and the admin page shows version, last check and per-asset status | PASS (fake GitHub), PENDING (real sync on the LXC) | `tests/integration/test_phase7_rustdesk.py::test_sync_downloads_verifies_and_admin_page_shows`; prereleases skipped; keeps the current and one previous version |
+| A simulated hash mismatch fails closed (old version stays active, `rustdesk.sync_failed` audited) | PASS | `test_hash_mismatch_fails_closed` (no partial files left, last check shows the failure) |
+| Windows download arrives with the configured filename. A key with `/` triggers the fallback and the admin warning | PASS | `test_downloads_need_token_and_carry_filename` (`rustdesk-host=...,key=...,.exe`), `test_key_with_slash_falls_back_and_warns_admin`; browser `tests/e2e/test_phase7_prompt.py` (real download filenames) |
+| Detection unit tests cover Windows x64 and arm64, macOS both chips, Linux, Android, iOS | PASS | `tests/unit/test_phase7_rustdesk_units.py` (also: Mac without Client Hints asks the customer, defaulting to Apple chip; iPad in desktop mode refused) |
+| Downloads without a valid customer token return 404 | PASS | No cookie, a forged cookie and an ended session all 404 |
+
+Also: assets without a GitHub digest are hashed locally and wait for admin approval; pin, unpin and roll back work and are audited; Authenticode checked with `osslsigncode` (result recorded per Windows asset); prompt and decline audited, the tech gets toasts for download and decline; Android shows the permissions note; Mac and Linux show the server host and key with copy buttons.
+
 ## Deviations and decisions
 
 | # | Playbook said | Built | Why |
@@ -160,6 +174,8 @@ Also: absence clocks live in Redis ("absent since"), so a worker restart does no
 | D23 | Thumbnails pause when hidden | The thumbnail viewer is closed (not just paused) when the tab is hidden, the tile scrolls out of view, or the same tech opens the full view | Zero bytes and zero customer upload for an unseen thumbnail; reconnects in about 1 s. |
 | D24 | Balanced: up to 1080p | Viewer asks for at most 1920x1080 (`targetWidth`/`targetHeight`); Clear and Smooth use `scale` 100 and 50 | v30.2 iframe API. |
 | D25 | Event list | Added `session.access_granted` (admin gives a tech access) and `session.unshared` | Needed to audit those actions distinctly. |
+| D26 | Windows exe named `rustdesk-host=<HOST>,key=<KEY>.exe` | `rustdesk-host=<HOST>,key=<KEY>[,relay=<RELAY>],.exe` | The trailing comma is RustDesk's own final delimiter (1.5.0 `custom_server.rs`), so a "(1)" from a duplicate download doesn't break the key. Commas and `\ / : * ? " < > |` also trigger the fallback. |
+| D27 | (not specified) | 32-bit Windows (sciter), SUSE rpm, flatpak, armv7 Linux and the unattended Wayland build are not mirrored | Keeps the mirror to supported, current builds. Add rules to `ASSET_RULES` if needed. |
 | D11 | Docker Hub images | Same official images; this build container pulled them via `mirror.gcr.io` because of Docker Hub rate limits | No effect on the LXC. |
 
 ## Decisions recorded

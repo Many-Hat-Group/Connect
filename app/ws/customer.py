@@ -68,6 +68,8 @@ async def handle(ws: WebSocket, sid: str, msg: dict) -> None:
             d = detection.detect(s.user_agent or "", caps.get("hints") or {}, int(caps.get("maxTouchPoints") or 0))
             sessions.apply_device(s, d)
             await db.commit()
+            from ..services import rustdesk_prompt
+            await rustdesk_prompt.remember_device(sid, d)
             await presence.customer_seen(sid, st["timeouts"]["presence_ttl_seconds"])
             await ws.send_text(json.dumps(await viewer_payload(s)))
             await sessions.notify(db, s, {"type": "session.update"})

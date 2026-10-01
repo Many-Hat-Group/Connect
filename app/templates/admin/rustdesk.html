@@ -1,0 +1,30 @@
+{% extends "portal/layout.html" %}
+{% block title %}RustDesk{% endblock %}
+{% block content %}
+{% include "admin/_settings_nav.html" %}
+<h1>RustDesk client mirror</h1>
+{% if message %}<p class="alert" role="status">{{ message }}</p>{% endif %}
+{% if filename_problem %}<p class="alert error" role="alert" data-testid="filename-warning">{{ filename_problem }}</p>{% endif %}
+<dl class="facts">
+  <dt>Server host</dt><dd>{{ rd.host or 'Not set' }}</dd>
+  <dt>Relay</dt><dd>{{ rd.relay or 'Same as host' }}</dd>
+  <dt>Windows file name</dt><dd><code>{{ exe_name }}</code></dd>
+  <dt>Last check</dt><dd>{% if last %}<time class="localtime" datetime="{{ last.iso }}">{{ last.iso }}</time> {{ 'OK' if last.ok else 'Failed' }}: {{ last.result or last.error }}{% else %}Never{% endif %}</dd>
+</dl>
+<form method="post" action="/admin/rustdesk/check" class="inline"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn primary" type="submit">Check now</button></form>
+<form method="post" action="/admin/rustdesk/check" class="inline"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="force" value="1"><button class="btn" type="submit">Download again</button></form>
+<form method="post" action="/admin/rustdesk/rollback" class="inline"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn" type="submit">Roll back to previous</button></form>
+{% for r in releases if r.status != 'archived' %}
+<h2>Version {{ r.version }} <span class="pill {{ 'live' if r.status == 'active' else 'warn' if r.status in ('pending_approval', 'failed') else '' }}">{{ r.status|replace('_', ' ') }}</span>{% if r.pinned %} <span class="pill">pinned</span>{% endif %}</h2>
+<p class="muted">Published {{ r.published_at.strftime('%Y-%m-%d') if r.published_at else 'unknown' }}, fetched {{ r.fetched_at.strftime('%Y-%m-%d %H:%M') if r.fetched_at else 'never' }} UTC</p>
+<div class="row">
+  {% if r.status == 'pending_approval' %}<form method="post" action="/admin/rustdesk/approve"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="version" value="{{ r.version }}"><button class="btn primary" type="submit">Approve and activate</button></form>{% endif %}
+  {% if r.status in ('active', 'previous') and not r.pinned %}<form method="post" action="/admin/rustdesk/pin"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="version" value="{{ r.version }}"><button class="btn" type="submit">Pin this version</button></form>{% endif %}
+  {% if r.pinned %}<form method="post" action="/admin/rustdesk/unpin"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="version" value="{{ r.version }}"><button class="btn" type="submit">Unpin</button></form>{% endif %}
+</div>
+<div class="table-wrap"><table class="table">
+  <thead><tr><th>Platform</th><th>File</th><th>Size</th><th>SHA-256</th><th>Verified by</th><th>Signature</th></tr></thead>
+  <tbody>{% for a in r.assets %}<tr><td>{{ a.label }}</td><td><code>{{ a.filename }}</code></td><td>{{ ((a.size or 0) / 1048576)|round(1) }} MB</td><td><code title="{{ a.sha256 }}">{{ (a.sha256 or '')[:12] }}</code></td><td>{{ {'github_digest': 'GitHub digest', 'computed_only': 'Computed here only'}.get(a.verified_by, a.verified_by) }}</td><td>{{ a.authenticode or '' }}</td></tr>{% endfor %}</tbody>
+</table></div>
+{% else %}<p class="muted">No releases downloaded yet. Press Check now.</p>{% endfor %}
+{% endblock %}
