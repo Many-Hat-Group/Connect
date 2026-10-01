@@ -1,0 +1,6 @@
+[submodule "vendor/vdo.ninja"]
+	path = vendor/vdo.ninja
+	url = https://github.com/steveseguin/vdo.ninja
+[submodule "vendor/websocket_server"]
+	path = vendor/websocket_server
+	url = https://github.com/steveseguin/websocket_server

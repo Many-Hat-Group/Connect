@@ -1,0 +1,25 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>spike</title></head>
+<body>
+<div id="frames"></div>
+<script>
+  window.__events = [];
+  window.addEventListener("message", (e) => {
+    if (e.origin !== location.origin && e.origin !== "null") return;
+    // Identify the sending frame by window identity: frameElement is not
+    // readable for opaque-origin (sandboxed) frames.
+    const f = [...document.querySelectorAll("iframe")].find((x) => x.contentWindow === e.source);
+    window.__events.push({ t: Date.now(), src: f ? f.id : null, data: e.data });
+  });
+  window.addFrame = (id, src) => {
+    const f = document.createElement("iframe");
+    f.id = id;
+    f.allow = "camera; microphone; display-capture; autoplay; fullscreen";
+    f.width = 640; f.height = 360;
+    f.src = src;
+    document.getElementById("frames").appendChild(f);
+    return id;
+  };
+  window.send = (id, msg) => document.getElementById(id).contentWindow.postMessage(msg, location.origin);
+</script>
+</body></html>

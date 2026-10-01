@@ -1,0 +1,78 @@
+# Connect: one app per LXC. See docs/ARCHITECTURE.md.
+name: connect
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+
+networks:
+  internal:
+    ipam:
+      config:
+        - subnet: ${DOCKER_SUBNET:-172.31.250.0/24}
+
+services:
+  router:
+    image: nginx:1.28.0-alpine
+    restart: unless-stopped
+    logging: *logging
+    depends_on: [signal]
+    environment:
+      TRUSTED_PROXY_IP: ${TRUSTED_PROXY_IP:?set in .env}
+      PUBLIC_HOST: ${PUBLIC_HOST:?set in .env}
+      NGINX_ENVSUBST_OUTPUT_DIR: /etc/nginx/conf.d
+    volumes:
+      - ./router/nginx.conf:/etc/nginx/templates/default.conf.template:ro
+      - ./vendor/vdo.ninja:/srv/vdo:ro
+    ports:
+      - "${ROUTER_BIND_IP:?set in .env}:8080:8080"
+    networks:
+      internal:
+        ipv4_address: ${ROUTER_IP:-172.31.250.10}
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  signal:
+    build:
+      context: .
+      dockerfile: signal/Dockerfile
+    image: connect-signal:local
+    restart: unless-stopped
+    logging: *logging
+    networks: [internal]
+    read_only: true
+    tmpfs: [/tmp]
+
+  coturn:
+    image: coturn/coturn:4.7.0
+    restart: unless-stopped
+    logging: *logging
+    network_mode: host
+    entrypoint: ["/bin/sh", "/etc/coturn-tmpl/entrypoint.sh"]
+    command: []
+    environment:
+      TURN_LISTEN_IP: ${TURN_LISTEN_IP:?set in .env}
+      TURN_RELAY_IP: ${TURN_RELAY_IP:?set in .env}
+      TURN_EXTERNAL_IP: ${TURN_EXTERNAL_IP:?set in .env}
+      TURN_REALM: ${TURN_HOST:?set in .env}
+      TURN_SHARED_SECRET: ${TURN_SHARED_SECRET:?set in .env}
+      TURN_MIN_PORT: ${TURN_MIN_PORT:-49160}
+      TURN_MAX_PORT: ${TURN_MAX_PORT:-49200}
+      TURN_EXTRA_DENIED_RANGES: ${TURN_EXTRA_DENIED_RANGES:-}
+      TURN_TEST_APPEND: ${TURN_TEST_APPEND:-}
+    volumes:
+      - ./coturn:/etc/coturn-tmpl:ro
+      - turncerts:/certs:ro
+    healthcheck:
+      test: ["CMD-SHELL", "turnutils_stunclient -p 3478 $${TURN_LISTEN_IP} >/dev/null 2>&1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  turncerts:

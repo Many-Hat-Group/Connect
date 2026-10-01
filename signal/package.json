@@ -1,0 +1,10 @@
+{
+  "name": "connect-signal",
+  "private": true,
+  "description": "Runtime dependencies for the unmodified VDO.Ninja advanced handshake server (vendor/websocket_server/vdoninja_advanced.js)",
+  "license": "AGPL-3.0-only",
+  "dependencies": {
+    "uuid": "14.0.2",
+    "ws": "8.22.0"
+  }
+}
