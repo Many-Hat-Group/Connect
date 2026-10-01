@@ -70,15 +70,19 @@ Removing the publisher iframe from the DOM ends every capture track (`readyState
 
 | Value | Path |
 |---|---|
-| Resolution (Clear: native, Balanced: up to 1080p, Smooth: 50 percent) | Viewer-side: `scale` / `{scale:N}` |
+| Resolution (Clear: native, Balanced: up to 1080p, Smooth: 50 percent) | Viewer-side: `{scale:100}` / `{scale:50}`; Balanced adds `{targetWidth:1920, targetHeight:1080, UUID}`. The full view opens with `scale=100` (native). |
 | Bitrate | Viewer-side: `bitrate` / `{bitrate:kbps}` |
-| Framerate (Clear 5 fps, Balanced 15, Smooth 30) | **Publisher-only.** The app asks the customer page to apply it. The customer page can only do this by reloading the publisher iframe with a new `maxframerate=` (a brief interruption), or through the Companion `videoConstraint` command (to be confirmed in Phase 4). Documented choice goes here once tested. |
+| Framerate (Clear 5 fps, Balanced 15, Smooth 30) | **Publisher-only.** The app sends it to the customer page, which posts `{action: "videoConstraint", value: "frameRate", value2: "5"}` to its own frame (Companion command, `lib.js` `commands.videoConstraint`, calls `applyConstraints` on the live track). Verified in Phase 4: outbound fps drops to 5 or less and rises again, with no reload. |
 
 Because framerate is publisher-wide, it applies to every viewer of that stream. Thumbnails (`bitrate=150&vw=320&noaudio`) rely on the low bitrate to keep frame rate low (verified: width at most 320, no audio bytes).
 
 ## Pausing thumbnails
 
-`{bitrate:0}` pauses inbound video for that viewer, and restoring the thumbnail bitrate resumes it. Phase 4 also removes the thumbnail iframe when the same tech opens the full view.
+Thumbnails (`bitrate=150&vw=320&noaudio`, sandboxed) are closed outright when the dashboard tab is hidden, the tile scrolls out of view, or the same tech opens the full view, and reopened when needed. That gives zero bytes and zero customer upload; `{bitrate:0}` would also pause video but keeps the connection. The first frames go out at source size until the `vw=320` request reaches the publisher (about 1 to 3 s).
+
+## Tech viewer frames
+
+Sandboxed (`sandbox="allow-scripts"`, no `allow-same-origin`), no `iframetarget` (its origin is opaque, so VDO.Ninja posts with `*` to the parent only, and the parent matches `event.source`). Commands are posted with target `*`. `{getStats:true}` and `{getDetailedState:true}` replies (matched by `cib`) are the only way to read state; `detailedState[...].videoVolume` confirms mute and unmute.
 
 ## Security findings and the mitigations we applied
 

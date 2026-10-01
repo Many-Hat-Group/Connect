@@ -36,7 +36,7 @@ def fragment(params: list[tuple[str, str | None]]) -> str:
 
 
 def _common(room: str, password: str, signal_token: str, turn_host: str, session_id: str,
-            relay: bool = False) -> list[tuple[str, str | None]]:
+            relay: bool = False, own_origin_events: bool = True) -> list[tuple[str, str | None]]:
     user, cred = turn_creds.credentials(session_id)
     p: list[tuple[str, str | None]] = [
         ("room", room),
@@ -46,8 +46,12 @@ def _common(room: str, password: str, signal_token: str, turn_host: str, session
         ("addstun", f"{user};{cred};turn:{turn_host}:3478?transport=tcp"),
         ("turn", f"{user};{cred};turns:{turn_host}:5349"),
         ("cleanoutput", None),
-        ("iframetarget", None),
     ]
+    if own_origin_events:
+        # Post iframe events only to our own origin. Not for the sandboxed
+        # tech viewer: its origin is opaque, so the parent checks
+        # event.source instead.
+        p.append(("iframetarget", None))
     if relay:
         p.append(("relay", None))
     return p
@@ -80,7 +84,7 @@ def publisher_url(*, room, password, stream_id, signal_token, turn_host, session
 def viewer_url(*, room, password, stream_id, signal_token, turn_host, session_id, scale: int | None = None,
                bitrate: int | None = None, width: int | None = None, audio: bool = True, start_muted=True,
                relay=False) -> str:
-    p = _common(room, password, signal_token, turn_host, session_id, relay)
+    p = _common(room, password, signal_token, turn_host, session_id, relay, own_origin_events=False)
     p += [("view", stream_id), ("scene", None), ("nomeshcast", None)]
     if start_muted:
         p.append(("volume", "0"))

@@ -1,7 +1,32 @@
 {% extends "portal/layout.html" %}
 {% block title %}Dashboard{% endblock %}
+{% block main_class %}container wide{% endblock %}
 {% block content %}
+<div class="banner" id="bruteforce-banner" role="alert" hidden></div>
 {% if welcome %}<p class="alert ok">Setup is complete. Add your techs under Users.</p>{% endif %}
-<h1>Dashboard</h1>
-<p class="muted">Sessions appear here.</p>
+<div class="dash-head">
+  <h1>Dashboard</h1>
+  <button type="button" class="btn primary big" id="new-session">New session</button>
+</div>
+<section class="code-panel card" id="code-panel" hidden aria-live="polite" aria-label="New join code">
+  <p class="muted">Read this code to the customer. They go to <strong>{{ urls.connect_url|replace('https://', '') }}</strong> and choose screen or camera.</p>
+  <div class="code-big" data-testid="join-code"></div>
+  <p class="code-countdown"></p>
+  <p class="code-link muted"></p>
+  <div class="row">
+    <button type="button" class="btn" id="copy-code">Copy code</button>
+    <button type="button" class="btn" id="copy-link">Copy link</button>
+    <button type="button" class="btn" id="close-code">Close</button>
+  </div>
+</section>
+<section id="pending-wrap" hidden>
+  <h2>Waiting for customers</h2>
+  <ul id="pending" class="pending"></ul>
+</section>
+<section>
+  <h2 class="sr-only">Active sessions</h2>
+  <p class="muted" id="no-sessions">No active sessions. Press New session to get a code for a customer.</p>
+  <div class="tiles" id="sessions"></div>
+</section>
 {% endblock %}
+{% block page_scripts %}<script type="module" src="/static/js/dashboard.js?v={{ static_v }}"></script>{% endblock %}

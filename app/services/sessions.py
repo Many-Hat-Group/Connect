@@ -152,6 +152,9 @@ async def end(db: AsyncSession, s: Session, reason: str, actor: Actor, ip: str |
     assert reason in END_REASONS, reason
     if s.status == "ended":
         return False
+    if block_ip_seconds and s.customer_ip:
+        # Before any database change, so a Redis failure cannot half-end a session.
+        await redis().set(f"block:ip:{s.customer_ip}", str(s.id), ex=block_ip_seconds)
     s.status = "ended"
     s.ended_at = utcnow()
     s.end_reason = reason
@@ -165,7 +168,6 @@ async def end(db: AsyncSession, s: Session, reason: str, actor: Actor, ip: str |
     payload = {"reason": reason, **(data or {})}
     await emit(db, "session.ended", actor, s.id, payload, ip=ip, commit=False)
     if block_ip_seconds and s.customer_ip:
-        await redis().set(f"block:ip:{s.customer_ip}", s.id, ex=block_ip_seconds)
         await emit(db, "session.ip_blocked", actor, s.id, {"ip": str(s.customer_ip), "seconds": block_ip_seconds},
                    ip=ip, commit=False)
     await db.commit()

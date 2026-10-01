@@ -1,0 +1,50 @@
+{% extends "portal/layout.html" %}
+{% block title %}Session{% endblock %}
+{% block main_class %}container wide{% endblock %}
+{% block content %}
+<div id="session-view" class="session-view" data-session="{{ session_id }}">
+  <section class="view-main" aria-label="Customer stream">
+    <div class="view-head">
+      <h1 id="cust-name">Session</h1>
+      <span class="muted" id="duration"></span>
+      <div class="view-tabs" id="stream-tabs" role="group" aria-label="Choose a stream" hidden></div>
+    </div>
+    <div class="stage" id="stage"></div>
+    <p class="muted" id="view-status" role="status" aria-live="polite">Loading</p>
+    <div class="side-streams" id="side-streams" hidden aria-label="Other streams"></div>
+    <div class="controls row">
+      <label>Quality
+        <select id="preset">
+          <option value="clear">Clear (sharp text, slow motion)</option>
+          <option value="balanced" selected>Balanced</option>
+          <option value="smooth">Smooth (fast motion, lower detail)</option>
+        </select>
+      </label>
+      <button type="button" class="btn" id="mute" aria-pressed="false">Unmute</button>
+      <label>Volume <input type="range" id="volume" min="0" max="100" value="80"></label>
+      <button type="button" class="btn" id="fullscreen">Full screen</button>
+      <span class="nav-spacer"></span>
+      <div id="share-controls" class="row"></div>
+      <button type="button" class="btn" id="rustdesk" hidden>Request remote control</button>
+      <button type="button" class="btn" id="end">End session</button>
+      <button type="button" class="btn danger" id="kill">Kill</button>
+    </div>
+  </section>
+  <aside class="view-side card" aria-label="Session details">
+    <h2>Customer</h2>
+    <dl class="facts" id="facts"></dl>
+    <h2>Timeline</h2>
+    <ol class="timeline" id="timeline"></ol>
+  </aside>
+</div>
+<dialog id="kill-dialog" aria-labelledby="kill-title">
+  <h2 id="kill-title">Kill this session?</h2>
+  <p>The customer's sharing stops immediately and every link for this session stops working.</p>
+  <label class="check"><input type="checkbox" id="kill-block"> Also block this customer's IP address for 1 hour</label>
+  <div class="row">
+    <button type="button" class="btn danger" id="kill-confirm">Kill session</button>
+    <button type="button" class="btn" id="kill-cancel">Cancel</button>
+  </div>
+</dialog>
+{% endblock %}
+{% block page_scripts %}<script type="module" src="/static/js/session-view.js?v={{ static_v }}"></script>{% endblock %}

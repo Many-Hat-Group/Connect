@@ -68,7 +68,11 @@ class SecurityHeaders(BaseHTTPMiddleware):
         else:
             h["Permissions-Policy"] = ("camera=(), microphone=(), display-capture=(), autoplay=(self), "
                                        "fullscreen=(self), geolocation=(), payment=(), usb=()")
-        if not path.startswith("/static/"):
+        if path.startswith("/static/"):
+            # Revalidate every load (ETag): JS modules are imported without a
+            # version query, so they must never be served stale.
+            h.setdefault("Cache-Control", "no-cache")
+        else:
             h.setdefault("Cache-Control", "no-store")
         return response
 

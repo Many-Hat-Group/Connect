@@ -22,7 +22,7 @@ from ..auth import websession
 from ..config import get_config
 from ..db import sessionmaker
 from ..models import Session, User
-from ..services import permissions, presence
+from ..services import permissions, presence, viewers
 from ..services import settings as settings_svc
 from .hub import hub
 
@@ -100,6 +100,9 @@ async def portal_ws(ws: WebSocket):
                 continue
             if msg.get("type") == "hb":
                 marked = await heartbeat(user, msg.get("visible") or [])
+                for v in (msg.get("views") or [])[:20]:
+                    if isinstance(v, str) and len(v) < 64:
+                        await viewers.refresh(v, str(user.id))
                 await ws.send_text(json.dumps({"type": "hb.ack", "present": marked}))
             elif msg.get("type") == "ping":
                 await ws.send_text('{"type":"pong"}')

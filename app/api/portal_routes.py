@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..db import get_db
 from ..models import User
-from ..services import branding
+from ..services import branding, permissions
 from ..services import settings as settings_svc
 from ..web import redirect, render, require_user
 
@@ -19,6 +19,13 @@ router = APIRouter()
 @router.get("/portal")
 async def dashboard(request: Request, user: User = Depends(require_user), db: AsyncSession = Depends(get_db)):
     return await render(request, db, "portal/dashboard.html", {"welcome": request.query_params.get("welcome")})
+
+
+@router.get("/portal/session/{session_id}")
+async def session_page(request: Request, session_id: str, user: User = Depends(require_user),
+                       db: AsyncSession = Depends(get_db)):
+    s = await permissions.load_session_for(db, user, session_id)
+    return await render(request, db, "portal/session.html", {"session_id": str(s.id)})
 
 
 @router.get("/brand.css")

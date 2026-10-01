@@ -3,6 +3,7 @@
 
 const handlers = new Set();
 const visibleSessions = new Set();
+const openViews = new Set();   // stream ids this tab is viewing (thumbnail or full)
 let ws = null;
 let backoff = 1000;
 let soundEnabled = false;
@@ -16,6 +17,8 @@ export function onMessage(fn) { handlers.add(fn); return () => handlers.delete(f
 export function setVisible(ids) { visibleSessions.clear(); ids.forEach((i) => visibleSessions.add(i)); }
 export function addVisible(id) { visibleSessions.add(id); }
 export function removeVisible(id) { visibleSessions.delete(id); }
+export function viewOpened(streamId) { openViews.add(streamId); }
+export function viewClosed(streamId) { openViews.delete(streamId); }
 
 export async function api(method, url, body) {
   const res = await fetch(url, {
@@ -34,7 +37,7 @@ export async function api(method, url, body) {
 
 function sendHeartbeat() {
   if (ws && ws.readyState === WebSocket.OPEN) {
-    ws.send(JSON.stringify({ type: "hb", visible: [...visibleSessions] }));
+    ws.send(JSON.stringify({ type: "hb", visible: [...visibleSessions], views: [...openViews] }));
   }
 }
 

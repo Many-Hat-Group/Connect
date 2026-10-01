@@ -91,6 +91,24 @@ Also: customer token cookie `__Host-connect-cust` (HttpOnly, Secure, SameSite=St
 
 Totals so far: 74 unit, 27 integration, 5 browser e2e (plus 14 Phase 0).
 
+### Phase 4: Tech dashboard and session view (2026-10-01)
+
+Measurements are taken on the customer side, on the publisher's outbound RTP to the tech viewer (`getStats`), because the tech viewer runs in a sandboxed opaque-origin frame the test cannot reach.
+
+| Acceptance check | Result | Evidence |
+|---|---|---|
+| E2E: tech creates a code, customer joins, tile appears with a thumbnail within 5 s of the stream going live | PASS | `tests/e2e/test_phase4_dashboard.py::test_tile_thumbnail_within_5s_and_session_view` (code created with the New session button; thumbnail `new-video-track-added` within 5 s; thumbnail encodes at 320 px or less) |
+| Full view opens at native resolution. Switching presets visibly changes resolution and framerate (`getStats`) | PASS | Same test: outbound width equals the source track width (1920); Smooth halves it; Clear drops the framerate to 5 fps or less; Balanced raises it again; `session.quality_changed` audited |
+| Audio is muted on open and plays after unmute (fake audio track) | PASS | `test_audio_starts_muted_and_unmutes`: audio track received, `videoVolume` 0 on open, 0.8 after Unmute; `session.audio_unmuted` audited |
+| Hidden dashboard tab pauses thumbnails (no inbound video bytes for that viewer) | PASS | `test_hidden_tab_pauses_thumbnails`: on `visibilitychange` to hidden the thumbnail viewer is closed, the publisher's connection to it disappears; it comes back when visible |
+| Kill ends the session immediately, the customer page tears down, and reconnecting with the old token fails | PASS | `test_kill_tears_down_customer_and_old_token_fails`: customer page shows Session ended, all capture tracks `ended`, `end_reason = tech_killed`; old token refused on `/s` and `/ws/customer`; optional 1-hour IP block refuses a new code from that IP |
+
+Also: viewer cap enforced server-side (4th viewer gets 409, `tests/integration/test_phase4_api.py`), opening the full view closes that tech's dashboard thumbnail in every tab, `session.viewed` / `session.view_closed` / `session.admin_joined` audited, one portal websocket per page (regression test).
+
+Bugs found and fixed by these tests: IP block stored a UUID in Redis (500 on Kill; the block now happens before any database change); capture Permissions-Policy missed `/s`; `portal.js` loaded twice (duplicate toasts).
+
+Totals: 74 unit, 30 integration, 10 browser e2e (plus 14 Phase 0).
+
 ## Deviations and decisions
 
 | # | Playbook said | Built | Why |
@@ -115,6 +133,9 @@ Totals so far: 74 unit, 27 integration, 5 browser e2e (plus 14 Phase 0).
 | D19 | Publisher reports `audio_available` via the iframe API | Read-only check of the same-origin publisher frame's own local tracks (`session.streamSrc` / `session.screenStream`), with the tech viewer's `new-audio-track-added` as backup | v30.2 has no publisher-side audio event. Nothing in VDO.Ninja is modified or written. |
 | D20 | (not specified) | Screen share frames use `audiodevice=0` (no microphone panel or mic mix) and `systemaudio=include` for the first screen; later screens use `ssvo` (video only) | Clean customer UI; audio only from the first stream. |
 | D21 | Ending removes the iframe | `{close:true}` is sent first, then the frame is removed | Clean hang-up for the viewer, then every capture track ends. |
+| D22 | Framerate path to be decided in Phase 4 | Framerate goes to the customer page, which posts VDO.Ninja's Companion command `{action: "videoConstraint", value: "frameRate", value2: N}` to its own frame | `applyConstraints` on the live track: no reload, no second screen pick. Applies to every viewer of that stream. |
+| D23 | Thumbnails pause when hidden | The thumbnail viewer is closed (not just paused) when the tab is hidden, the tile scrolls out of view, or the same tech opens the full view | Zero bytes and zero customer upload for an unseen thumbnail; reconnects in about 1 s. |
+| D24 | Balanced: up to 1080p | Viewer asks for at most 1920x1080 (`targetWidth`/`targetHeight`); Clear and Smooth use `scale` 100 and 50 | v30.2 iframe API. |
 | D11 | Docker Hub images | Same official images; this build container pulled them via `mirror.gcr.io` because of Docker Hub rate limits | No effect on the LXC. |
 
 ## Decisions recorded

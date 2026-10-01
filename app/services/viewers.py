@@ -53,3 +53,8 @@ async def remove(stream_id: str, user_id: str) -> None:
 
 async def for_session(stream_ids: list[str]) -> dict[str, list[dict]]:
     return {sid: await list_for(sid) for sid in stream_ids}
+
+
+async def refresh(stream_id: str, user_id: str) -> bool:
+    """Heartbeat for an existing view; never creates one."""
+    return bool(await redis().expire(_key(stream_id, user_id), TTL))

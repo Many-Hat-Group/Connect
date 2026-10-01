@@ -160,14 +160,11 @@ function stopAll() {
 }
 
 function applySettings(m) {
-  // Publisher-only values (framerate) need a reload of that frame with a new
-  // URL built by the server. See docs/vdo-notes.md.
-  if (m.frame && publishers.has(m.frame.id)) {
-    const old = publishers.get(m.frame.id);
-    old.destroy();
-    publishers.delete(m.frame.id);
-    addFrame(m.frame);
-  }
+  // Framerate is publisher-only. VDO.Ninja's Companion command
+  // videoConstraint applies it to the live capture track (applyConstraints),
+  // so there is no reload and no new screen picker. See docs/vdo-notes.md.
+  const p = publishers.get(m.stream);
+  if (p && m.fps) p.send({ action: "videoConstraint", value: "frameRate", value2: String(m.fps) });
 }
 
 function showEnded(message) {
