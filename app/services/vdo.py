@@ -65,7 +65,10 @@ def label_param(label: str) -> str:
 def publisher_url(*, room, password, stream_id, signal_token, turn_host, session_id, share_type, label,
                   audio_ok: bool = True, max_framerate: int | None = None, relay=False) -> str:
     p = _common(room, password, signal_token, turn_host, session_id, relay)
-    p += [("push", stream_id), ("label", label_param(label))]
+    # An empty view= means "watch no one" (main.js). Without it, the
+    # customer's frames in the same room pull each other's streams, which
+    # doubles the customer's upload for every extra screen.
+    p += [("push", stream_id), ("label", label_param(label)), ("view", None)]
     if share_type == "screen":
         # No autostart: getDisplayMedia needs a click inside the frame, so the
         # customer presses VDO.Ninja's own "Select screen to share" button.

@@ -159,7 +159,34 @@ Also: admin Settings page (timeouts, code TTL, rate limits, viewer cap, retentio
 
 **Hardening found by the image scan:** the first pins were several patch releases old and carried fixed HIGH/CRITICAL CVEs. All images were moved to current patches (nginx 1.30.5, PostgreSQL 16.15, Redis 7.4.11, Node.js 22.23.3, Python 3.12.14 on Debian 13, coturn 4.18.0) and every upstream image now runs through a thin wrapper in `images/` that applies security updates. Postgres: `gosu` replaced by `su-exec`; certbot: fixed Python packages pinned, pip and build-only tools removed; both flattened to one layer. The app image applies `apt-get upgrade`; the signal image drops npm. coturn 4.18 removed `no-tlsv1`, `no-tlsv1_1`, `no-stun-backward-compatibility` and `no-cli` (all now the default behaviour), so they were dropped from the template. Phase 0 (14), the TURN checks and all e2e tests were re-run on the new images and pass.
 
-Totals: 100 unit, 55 integration, 15 browser e2e, 14 Phase 0.
+Totals after Phase 9: 91 unit, 64 integration (155), 16 browser e2e, 14 Phase 0, plus the TURN and port checks.
+
+### Phase 9: Multi-monitor (2026-10-01)
+
+| Acceptance check | Result | Evidence |
+|---|---|---|
+| E2E with two fake capture sources: both streams appear, the tech switches between them, and only the selected one is at full resolution (`getStats`) | PASS | `tests/e2e/test_phase9_multimonitor.py`: "Share another screen" adds a second publisher frame; the tile shows both side by side; the session view selector switches; the selected stream goes out at the source width (1920), the other at 320 or less, and the roles swap on switching (measured per stream, connected peers only) |
+| Stopping one stream leaves the session live on the other | PASS | Same test: per-stream "Stop sharing Screen 1" button; one stream `live`, session `live`, selector hides, the full view continues on Screen 2 |
+
+Also: maximum screen streams from settings (default 2); audio only from the first stream (extra screens use `ssvo`).
+
+**Bug found by this test:** the customer's publisher frames sit in the same VDO.Ninja room and were pulling each other's streams, which doubles the customer's upload for every extra screen. Fixed with an empty `&view` on every publisher URL ("request no streams to watch", `main.js`). Viewers now also hang up properly (`{close:true}`) on `pagehide`, so the customer's side drops them at once rather than after an ICE timeout.
+
+## Go-live checklist (Section 11)
+
+Nothing has been made public. Every item below needs Pierce and the real LXC. Go-live needs "Confirm 1 of 2", then a written summary of what becomes public, then "Confirm 2 of 2".
+
+| Item | Status |
+|---|---|
+| All phase acceptance checks green and recorded | Done in the build container; LXC-only checks (marked PENDING above) still to run on the LXC |
+| Manual device matrix passed | PENDING: `docs/device-test-matrix.md` |
+| Admin accounts for all 4 techs created, MFA enrolled | PENDING |
+| Default and test data removed, setup wizard confirmed disabled | PENDING (the wizard disables itself once the first admin exists) |
+| Backups confirmed: Proxmox Backup includes the LXC, and a `pg_dump` restore tested once | PENDING (`make backup`, `make restore-test FILE=...` work in the simulation) |
+| Firewall rules applied: TURN ports public, 8080 proxy-only | PENDING (outside the LXC: STOP, Pierce) |
+| DNS published: `connect` via proxy, `turn` DNS only | PENDING (outside the LXC: STOP, Pierce) |
+| Edge proxy site enabled | PENDING: drafted in `docs/edge-proxy-connect.conf`, not applied (STOP, Pierce) |
+| Post-go-live smoke test from an external network and a phone on mobile data | PENDING |
 
 ## Deviations and decisions
 
@@ -193,6 +220,7 @@ Totals: 100 unit, 55 integration, 15 browser e2e, 14 Phase 0.
 | D27 | (not specified) | 32-bit Windows (sciter), SUSE rpm, flatpak, armv7 Linux and the unattended Wayland build are not mirrored | Keeps the mirror to supported, current builds. Add rules to `ASSET_RULES` if needed. |
 | D28 | Use the upstream images | Thin hardened wrappers in `images/` (security updates; postgres and certbot flattened) | Trivy acceptance check; nothing functional changes. |
 | D29 | (not specified) | `/admin/health` cannot read container status (the app has no Docker socket, on purpose); it probes each service instead | Giving the app the Docker socket would be root on the LXC. |
+| D30 | Publisher URL parameters | Added empty `view` to every publisher URL | Stops the customer's own frames watching each other (found in Phase 9). |
 | D11 | Docker Hub images | Same official images; this build container pulled them via `mirror.gcr.io` because of Docker Hub rate limits | No effect on the LXC. |
 
 ## Decisions recorded

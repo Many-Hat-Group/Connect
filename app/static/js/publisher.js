@@ -13,7 +13,15 @@ export class Publisher {
     this.wrap.className = "frame-wrap";
     const cap = document.createElement("div");
     cap.className = "frame-label";
-    cap.textContent = frame.label;
+    const name = document.createElement("span");
+    name.textContent = frame.label;
+    this.stopBtn = document.createElement("button");
+    this.stopBtn.type = "button";
+    this.stopBtn.className = "btn small frame-stop";
+    this.stopBtn.textContent = `Stop sharing ${frame.label}`;
+    this.stopBtn.hidden = true;
+    this.stopBtn.addEventListener("click", () => this.stopped());
+    cap.append(name, this.stopBtn);
     this.iframe = document.createElement("iframe");
     this.iframe.title = `${frame.label} sharing panel`;
     this.iframe.allow = "camera; microphone; display-capture; autoplay; fullscreen";

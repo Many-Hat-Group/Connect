@@ -240,6 +240,9 @@ function closeThumb(sid) {
 
 window.addEventListener("pagehide", () => {
   for (const t of tiles.values()) for (const [sid, v] of t.thumbs) if (v) {
+    // Hang up properly so the customer's side drops this connection now,
+    // instead of waiting for ICE to time out (it costs them upload).
+    v.send({ close: true });
     fetch(`/api/sessions/${t.data.id}/view/close`, { method: "POST", keepalive: true, credentials: "same-origin",
       headers: { "Content-Type": "application/json", "X-CSRF-Token": document.body.dataset.csrf },
       body: JSON.stringify({ stream_id: sid, kind: "thumb" }) });

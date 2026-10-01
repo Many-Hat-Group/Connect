@@ -109,6 +109,7 @@ def test_publisher_url_is_fragment_and_fully_encoded():
     assert "%2B" in parts["wss2"]  # '+' must never reach VDO.Ninja raw
     assert unquote(parts["label"]) == "Screen_1"
     assert "autostart" not in parts and "screenshare" in parts and parts["audiodevice"] == "0"
+    assert "view" in parts and parts["view"] is None   # publishers never pull each other
     for slot in ("stun", "addstun", "turn"):
         assert "turn.example.com" in unquote(parts[slot])
     assert unquote(parts["addstun"]).endswith("?transport=tcp")

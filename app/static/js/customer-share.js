@@ -146,6 +146,9 @@ function updateUi() {
     statusText.textContent = "You are not sharing";
   }
   btnStop.hidden = live.length === 0;
+  btnStop.textContent = live.length > 1 ? "Stop sharing all" : "Stop sharing";
+  // With several streams, each frame gets its own stop button.
+  for (const p of all) p.stopBtn.hidden = !(p.live && all.length > 1);
   btnAgain.hidden = all.length > 0;
   btnAdd.hidden = !(data.share_type === "screen" && canScreen && live.length > 0 && screens.length < data.max_screens);
 }

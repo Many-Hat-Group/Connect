@@ -227,6 +227,8 @@ onMessage((m) => {
   }
 });
 window.addEventListener("pagehide", () => {
+  if (viewer) viewer.send({ close: true });
+  for (const v of side.values()) if (v) v.send({ close: true });
   const ids = [[selected, "full"], ...[...side.keys()].map((s) => [s, "thumb"])];
   for (const [sid, kind] of ids) if (sid) {
     fetch(`/api/sessions/${sessionId}/view/close`, { method: "POST", keepalive: true, credentials: "same-origin",
