@@ -8,3 +8,4 @@ tests/artifacts/
 node_modules/
 signal/node_modules/
 /backups/
+.trivy-cache/

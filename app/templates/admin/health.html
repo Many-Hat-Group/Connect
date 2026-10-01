@@ -1,0 +1,24 @@
+{% extends "portal/layout.html" %}
+{% block title %}System health{% endblock %}
+{% block content %}
+{% include "admin/_settings_nav.html" %}
+<h1>System health</h1>
+<table class="table">
+  <thead><tr><th>Check</th><th>Result</th><th>Detail</th><th>Time</th></tr></thead>
+  <tbody>
+  {% for c in checks %}<tr><td>{{ c.name }}</td><td><span class="pill {{ 'live' if c.ok else 'warn' }}" data-check="{{ c.name }}">{{ 'OK' if c.ok else 'Problem' }}</span></td><td>{{ c.detail }}</td><td>{{ c.ms }} ms</td></tr>{% endfor %}
+  <tr><td>Relay-only connection from your browser</td><td><span class="pill" id="relay-result">Not run</span></td><td id="relay-detail">Gathers TURN relay candidates using short-lived credentials.</td><td><button type="button" class="btn small" id="relay-run">Run test</button></td></tr>
+  </tbody>
+</table>
+<h2>RustDesk</h2>
+<p>Active version: {{ rustdesk_active or 'none' }}. Last check: {% if rustdesk_last %}{{ 'OK' if rustdesk_last.ok else 'failed' }}, {{ rustdesk_last.result or rustdesk_last.error }}{% else %}never{% endif %}. <a href="/admin/rustdesk">Manage</a></p>
+<h2>Backups</h2>
+{% if backup %}<p>Latest database dump {{ backup.name }} ({{ backup.size_mb }} MB), {{ backup.age_hours }} hours old. {{ backup.count }} dumps kept.</p>
+{% else %}<p class="alert">No database dump found. Check the backup service.</p>{% endif %}
+<h2>Disk</h2>
+<table class="table"><thead><tr><th>Volume</th><th>Used</th><th>Free</th></tr></thead><tbody>
+{% for d in disk %}<tr><td>{{ d.path }}</td><td>{{ d.used_gb }} of {{ d.total_gb }} GB ({{ d.percent }}%)</td><td>{{ d.free_gb }} GB</td></tr>{% endfor %}
+</tbody></table>
+<p class="muted">Container restarts and logs: run <code>docker compose ps</code> and <code>docker compose logs</code> on the server.</p>
+{% endblock %}
+{% block page_scripts %}<script type="module" src="/static/js/health.js"></script>{% endblock %}

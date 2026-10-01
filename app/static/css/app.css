@@ -203,3 +203,15 @@ dialog::backdrop { background: rgba(0,0,0,.4); }
 .subnav { display: flex; gap: 1rem; margin-bottom: .5rem; flex-wrap: wrap; }
 .subnav a { text-decoration: none; padding: .2rem 0; border-bottom: 2px solid transparent; }
 .subnav a[aria-current] { border-bottom-color: var(--brand-primary); font-weight: 600; }
+.branding-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 380px); gap: 1.5rem; align-items: start; }
+.preview-box { --pv-primary: var(--brand-primary); --pv-primary-text: var(--brand-primary-text); --pv-accent: var(--brand-accent);
+  --pv-accent-text: var(--brand-accent-text); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: var(--bg); }
+.preview-bar { background: var(--pv-primary); color: var(--pv-primary-text); padding: .6rem .9rem; }
+.preview-body { padding: .9rem; display: flex; flex-direction: column; gap: .6rem; }
+.preview-warning { border-left: 5px solid var(--pv-accent); background: var(--warn-bg); padding: .5rem .7rem; margin: 0; }
+.preview-primary, .preview-accent { font: inherit; font-weight: 600; border: 0; border-radius: 6px; padding: .6rem 1rem; }
+.preview-primary { background: var(--pv-primary); color: var(--pv-primary-text); }
+.preview-accent { background: var(--pv-accent); color: var(--pv-accent-text); }
+#contrast-live.bad { color: var(--err); font-weight: 600; }
+.settings-form fieldset label { max-width: 520px; }
+@media (max-width: 900px) { .branding-layout { grid-template-columns: 1fr; } }

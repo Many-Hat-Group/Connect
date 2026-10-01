@@ -3,10 +3,10 @@
 # Safe to re-run: it only installs what is missing, never overwrites secrets,
 # and brings the stack up to the current configuration.
 #
-#   REPO_URL=https://github.com/many-hat-group/connect.git BRANCH=main \
-#   PUBLIC_URL=https://connect.mhits.au PUBLIC_HOST=connect.mhits.au \
+#   REPO_URL=https://github.com/<org>/connect.git BRANCH=main \
+#   PUBLIC_URL=https://connect.example.com PUBLIC_HOST=connect.example.com \
 #   TRUSTED_PROXY_IP=10.0.0.2 ROUTER_BIND_IP=10.0.0.20 \
-#   TURN_HOST=turn.mhits.au TURN_LISTEN_IP=203.0.113.10 TURN_RELAY_IP=203.0.113.10 TURN_EXTERNAL_IP=203.0.113.10 \
+#   TURN_HOST=turn.example.com TURN_LISTEN_IP=203.0.113.10 TURN_RELAY_IP=203.0.113.10 TURN_EXTERNAL_IP=203.0.113.10 \
 #   CERTBOT_EMAIL=ops@example.com CLOUDFLARE_DNS_API_TOKEN=... sh install.sh
 set -eu
 

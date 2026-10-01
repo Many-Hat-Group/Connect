@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Licences{% endblock %}
+{% block content %}
+<h1>Licences and source code</h1>
+<p>{{ brand.product_name }} is built on the open source software below. The unmodified source code of each component, at the version used here, is available from the links.</p>
+<table class="table">
+  <thead><tr><th>Component</th><th>Used for</th><th>Version</th><th>Licence</th><th>Source</th></tr></thead>
+  <tbody>
+  {% for c in items %}<tr><td>{{ c.name }}</td><td>{{ c.role }}</td><td>{{ c.version }}</td><td>{{ c.licence }}</td><td><a href="{{ c.source }}" rel="noopener">{{ c.source|replace('https://', '') }}</a></td></tr>{% endfor %}
+  </tbody>
+</table>
+{% endblock %}

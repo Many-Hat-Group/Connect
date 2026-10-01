@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}{{ brand.product_name }}{% endblock %} | {{ brand.company_name }}</title>
+  <title>{% block title %}{{ brand.product_name }}{% endblock %} | {{ brand.product_name }}, {{ brand.company_name }}</title>
   <link rel="icon" href="{{ brand.favicon_url or '/static/icons/favicon.svg' }}">
   <link rel="stylesheet" href="/static/css/app.css?v={{ static_v }}">
   <link rel="stylesheet" href="/brand.css?v={{ static_v }}">
@@ -27,6 +27,7 @@
     <span>{{ brand.footer_text or brand.company_name }}</span>
     {% if brand.support_phone %}<span>Phone <a href="tel:{{ brand.support_phone|replace(' ', '') }}">{{ brand.support_phone }}</a></span>{% endif %}
     {% if brand.support_email %}<span><a href="mailto:{{ brand.support_email }}">{{ brand.support_email }}</a></span>{% endif %}
+    {% if urls.help_url %}<a href="{{ urls.help_url }}" rel="noopener">Help</a>{% endif %}
     {% if urls.privacy_url %}<a href="{{ urls.privacy_url }}" rel="noopener">Privacy</a>{% endif %}
     <a href="/licences">Licences</a>
   </footer>

@@ -3,7 +3,7 @@
 # Paths are relative to the repository root (first compose file).
 services:
   edge:
-    image: nginx:1.28.0-alpine
+    image: nginx:1.30.5-alpine
     depends_on: [router]
     volumes:
       - ./tests/phase0/edge.conf:/etc/nginx/conf.d/default.conf:ro
@@ -15,7 +15,7 @@ services:
         ipv4_address: 172.31.250.5
 
   app:
-    image: python:3.12.11-slim-bookworm
+    image: python:3.12.14-slim-trixie
     build: !reset null
     depends_on: !reset []
     command: ["python", "-u", "/stub/authstub.py"]

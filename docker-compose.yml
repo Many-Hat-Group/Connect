@@ -31,7 +31,8 @@ networks:
 
 services:
   router:
-    image: nginx:1.28.0-alpine
+    build: images/nginx
+    image: connect-nginx:local
     restart: unless-stopped
     logging: *logging
     depends_on:
@@ -69,6 +70,7 @@ services:
     volumes:
       - media:/data/media
       - rustdesk:/data/rustdesk
+      - backups:/backups:ro
     networks: [internal]
 
   worker:
@@ -101,7 +103,8 @@ services:
     tmpfs: [/tmp]
 
   postgres:
-    image: postgres:16.10-alpine
+    build: images/postgres
+    image: connect-postgres:local
     restart: unless-stopped
     logging: *logging
     environment:
@@ -118,7 +121,8 @@ services:
       retries: 5
 
   redis:
-    image: redis:7.4.6-alpine
+    build: images/redis
+    image: connect-redis:local
     restart: unless-stopped
     logging: *logging
     command: ["redis-server", "--requirepass", "${REDIS_PASSWORD:?set in .env}", "--appendonly", "yes", "--save", "300 10"]
@@ -134,7 +138,7 @@ services:
       REDIS_PASSWORD: ${REDIS_PASSWORD:?set in .env}
 
   backup:
-    image: postgres:16.10-alpine
+    image: connect-postgres:local
     restart: unless-stopped
     logging: *logging
     depends_on:
@@ -158,7 +162,8 @@ services:
       retries: 3
 
   coturn:
-    image: coturn/coturn:4.7.0
+    build: images/coturn
+    image: connect-coturn:local
     restart: unless-stopped
     logging: *logging
     network_mode: host
@@ -184,7 +189,8 @@ services:
       retries: 3
 
   certbot:
-    image: certbot/dns-cloudflare:v5.8.0
+    build: images/certbot
+    image: connect-certbot:local
     restart: unless-stopped
     logging: *logging
     entrypoint: ["/bin/sh", "/opt/certbot/run.sh"]

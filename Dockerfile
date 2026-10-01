@@ -1,10 +1,12 @@
 # syntax=docker/dockerfile:1
 # Connect app and worker image (FastAPI, uvicorn).
-FROM python:3.12.11-slim-bookworm
+FROM python:3.12.14-slim-trixie
 
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1 PIP_DISABLE_PIP_VERSION_CHECK=1
 
+# Security updates on top of the pinned base, then only what the app needs.
 RUN apt-get update \
+ && apt-get upgrade -y --no-install-recommends \
  && apt-get install -y --no-install-recommends postgresql-client osslsigncode curl \
  && rm -rf /var/lib/apt/lists/* \
  && useradd --system --uid 10001 --home /srv/connect connect

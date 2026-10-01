@@ -189,3 +189,14 @@ def media_path(name: str) -> tuple[Path, str] | None:
     if not p.is_file():
         return None
     return p, MEDIA_TYPES[name.rsplit(".", 1)[1]]
+
+
+def render_email(settings: dict, subject: str, body: str) -> str:
+    """Render a plain-text email from branding settings (hook for future
+    notification emails)."""
+    from jinja2 import Environment, FileSystemLoader
+
+    from ..config import APP_DIR
+    env = Environment(loader=FileSystemLoader(str(APP_DIR / "templates")), autoescape=False, keep_trailing_newline=True)
+    return env.get_template("emails/base.txt").render(brand=settings["branding"], urls=settings["urls"],
+                                                     subject=subject, body=body)

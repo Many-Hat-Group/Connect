@@ -2,7 +2,7 @@
 # mounted read-only so changes do not need an image rebuild.
 services:
   edge:
-    image: nginx:1.28.0-alpine
+    image: nginx:1.30.5-alpine
     depends_on: [router]
     volumes:
       - ./tests/phase0/edge.conf:/etc/nginx/conf.d/default.conf:ro

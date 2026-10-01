@@ -9,7 +9,7 @@ cd "$(dirname "$0")/../.."
 TURN=${1:?turn server ip}
 PUBLIC_PEER=${2:-$TURN}
 SECRET=$(grep -E '^TURN_SHARED_SECRET=' .env | cut -d= -f2-)
-IMG=coturn/coturn:4.7.0
+IMG=coturn/coturn:4.18.0
 fail=0
 cred() { U="$(( $(date +%s) + 3600 )):check-$1-$$"; P=$(printf '%s' "$U" | openssl dgst -sha1 -hmac "$SECRET" -binary | base64); }
 uc() { docker run --rm --network host --entrypoint turnutils_uclient "$IMG" -u "$U" -w "$P" -n 1 -m 1 -l 100 -e "$1" -r 3480 "$TURN" 2>&1; }

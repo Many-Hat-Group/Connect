@@ -1,0 +1,46 @@
+{% extends "portal/layout.html" %}
+{% block title %}Branding{% endblock %}
+{% block content %}
+{% include "admin/_settings_nav.html" %}
+<h1>Branding</h1>
+{% if saved %}<p class="alert ok" role="status">Branding saved. Every page uses it straight away.</p>{% endif %}
+{% if error %}<p class="alert error" role="alert">{{ error }}</p>{% endif %}
+{% if warnings %}<div class="alert" role="status" id="contrast-warnings"><ul>{% for w in warnings %}<li>{{ w }}</li>{% endfor %}</ul></div>{% endif %}
+<div class="branding-layout">
+<form method="post" action="/admin/branding" enctype="multipart/form-data" class="stack" id="branding-form">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <label>Product name <input name="product_name" value="{{ b.product_name }}" maxlength="60" required></label>
+  <label>Company name <input name="company_name" value="{{ b.company_name }}" maxlength="120" required></label>
+  <label>Short name <input name="company_short" value="{{ b.company_short }}" maxlength="20"></label>
+  <div class="row">
+    <label>Primary colour <input type="color" name="primary_colour" value="{{ b.primary_colour }}"></label>
+    <label>Accent colour <input type="color" name="accent_colour" value="{{ b.accent_colour }}"></label>
+  </div>
+  <p class="muted" id="contrast-live" aria-live="polite"></p>
+  <label>Support phone <input name="support_phone" value="{{ b.support_phone }}" maxlength="40"></label>
+  <label>Support email <input type="email" name="support_email" value="{{ b.support_email }}" maxlength="200"></label>
+  <label>Connect address <input type="url" name="connect_url" value="{{ u.connect_url }}" required></label>
+  <label>Help page address <input type="url" name="help_url" value="{{ u.help_url }}"></label>
+  <label>Privacy policy address <input type="url" name="privacy_url" value="{{ u.privacy_url }}"></label>
+  <label>Footer text <input name="footer_text" value="{{ b.footer_text }}" maxlength="200"></label>
+  <label>Logo (PNG, JPEG or SVG, up to 2 MB) <input type="file" name="logo" accept="image/png,image/jpeg,image/svg+xml"></label>
+  {% if b.logo_url %}<label class="check"><input type="checkbox" name="remove_logo" value="1"> Remove the current logo</label>{% endif %}
+  <label>Favicon (PNG or SVG, up to 2 MB) <input type="file" name="favicon" accept="image/png,image/svg+xml"></label>
+  {% if b.favicon_url %}<label class="check"><input type="checkbox" name="remove_favicon" value="1"> Remove the current favicon</label>{% endif %}
+  <button class="btn primary" type="submit">Save branding</button>
+</form>
+<section class="preview" aria-label="Preview">
+  <h2>Preview</h2>
+  <div class="preview-box" id="preview">
+    <div class="preview-bar"><strong id="pv-short">{{ b.company_short or b.company_name }}</strong> <span id="pv-product">{{ b.product_name }}</span></div>
+    <div class="preview-body">
+      <p class="preview-warning">Only continue if you are on the phone with <span id="pv-company">{{ b.company_name }}</span>.</p>
+      <button type="button" class="preview-primary">Share my screen</button>
+      <button type="button" class="preview-accent">Accent</button>
+      <p class="muted small" id="pv-footer">{{ b.footer_text }} · {{ b.support_phone }}</p>
+    </div>
+  </div>
+</section>
+</div>
+{% endblock %}
+{% block page_scripts %}<script type="module" src="/static/js/branding.js"></script>{% endblock %}

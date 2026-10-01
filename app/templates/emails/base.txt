@@ -1,0 +1,11 @@
+{# Base for future notification emails (webhooks and email are out of scope for this build).
+   Everything brand-specific comes from settings, never from code. #}
+Subject: {{ subject }} | {{ brand.product_name }}
+
+{{ body }}
+
+{{ brand.company_name }}
+{% if brand.support_phone %}Phone {{ brand.support_phone }}
+{% endif %}{% if brand.support_email %}{{ brand.support_email }}
+{% endif %}{{ urls.connect_url }}
+{% if brand.footer_text %}{{ brand.footer_text }}{% endif %}

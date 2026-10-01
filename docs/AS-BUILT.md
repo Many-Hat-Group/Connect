@@ -12,7 +12,7 @@ Update this file as each phase completes, then upload it to the wiki.
 | Networking option used (a or b) | _pending_ |
 | VDO.Ninja tag | v30.2 (`d5a8b5669d1cb0ff75f984499f7025b745657808`) |
 | Handshake server version | steveseguin/websocket_server `92d9bce4f8c798b520cfd2781d6f7f8ae607b3fb` (`vdoninja_advanced.js`), ws 8.22.0, uuid 14.0.2, node 22.20.0-alpine |
-| coturn image version | `coturn/coturn:4.7.0` |
+| coturn image version | `coturn/coturn:4.18.0` |
 | App version / git commit | see `git log` (branch `claude/loving-newton-v7l17n`) |
 | RustDesk server host and relay | _pending (RustDesk server playbook)_ |
 | Current RustDesk client version | _pending (Phase 7)_ |
@@ -25,12 +25,12 @@ Update this file as each phase completes, then upload it to the wiki.
 
 | Service | Image |
 |---|---|
-| router | `nginx:1.28.0-alpine` |
-| signal | built from `node:22.20.0-alpine` |
-| coturn | `coturn/coturn:4.7.0` |
-| app, worker | built from `python:3.12.11-slim-bookworm` (`requirements.lock`) |
-| postgres, backup | `postgres:16.10-alpine` |
-| redis | `redis:7.4.6-alpine` |
+| router | `nginx:1.30.5-alpine` |
+| signal | built from `node:22.23.3-alpine` |
+| coturn | `coturn/coturn:4.18.0` |
+| app, worker | built from `python:3.12.14-slim-trixie` (`requirements.lock`) |
+| postgres, backup | `postgres:16.15-alpine` |
+| redis | `redis:7.4.11-alpine` |
 | certbot | `certbot/dns-cloudflare:v5.8.0` |
 
 ## Phase results
@@ -146,6 +146,21 @@ This build container cannot reach the GitHub releases API (its proxy only serves
 
 Also: assets without a GitHub digest are hashed locally and wait for admin approval; pin, unpin and roll back work and are audited; Authenticode checked with `osslsigncode` (result recorded per Windows asset); prompt and decline audited, the tech gets toasts for download and decline; Android shows the permissions note; Mac and Linux show the server host and key with copy buttons.
 
+### Phase 8: Branding, licences, hardening (2026-10-01)
+
+| Acceptance check | Result | Evidence |
+|---|---|---|
+| Changing every branding field changes customer pages, portal, emails-to-be and page titles with no code edits | PASS | `tests/integration/test_phase8_branding.py::test_every_branding_field_applies_everywhere`: product, company, short name, phone, email, footer, help and privacy URLs, logo, favicon and both colours set through `/admin/branding` and found on the choose, entry, login and portal pages, in every `<title>`, in `/brand.css` and in the email template `emails/base.txt` |
+| `make check-brand`, `pip-audit`, `trivy` and `check-vendor` pass | PASS | `check-brand: OK`; `pip-audit`: no known vulnerabilities in `requirements.lock`; Trivy 0.74.0: zero fixable HIGH/CRITICAL in all 7 deployed images; `check-vendor: OK` (now also checks `/licences` lists the pinned commits) |
+| Security headers verified with a header scan. Network log on customer and tech pages shows no third-party requests | PASS | `test_security_headers_on_every_page_type` (8 page types: strict CSP without unsafe-inline/eval, frame-ancestors, object-src, base-uri, nosniff, Referrer-Policy, X-Frame-Options, no-store, Permissions-Policy capture only on customer pages); `/vdo/` headers from Phase 0; `tests/e2e/test_phase8_hardening.py::test_no_third_party_requests` (full session, both sides) |
+| Relay-only health test succeeds | PASS | `test_relay_only_health_test`: relay candidates gathered from the admin's browser through coturn |
+
+Also: admin Settings page (timeouts, code TTL, rate limits, viewer cap, retention, TURN and RustDesk, with range checks), Branding page with live preview and WCAG contrast warnings, System health page (database, Redis, router, signal, worker heartbeat, STUN probe of coturn, RustDesk sync, latest backup, disk), public `/licences` page linked from every footer.
+
+**Hardening found by the image scan:** the first pins were several patch releases old and carried fixed HIGH/CRITICAL CVEs. All images were moved to current patches (nginx 1.30.5, PostgreSQL 16.15, Redis 7.4.11, Node.js 22.23.3, Python 3.12.14 on Debian 13, coturn 4.18.0) and every upstream image now runs through a thin wrapper in `images/` that applies security updates. Postgres: `gosu` replaced by `su-exec`; certbot: fixed Python packages pinned, pip and build-only tools removed; both flattened to one layer. The app image applies `apt-get upgrade`; the signal image drops npm. coturn 4.18 removed `no-tlsv1`, `no-tlsv1_1`, `no-stun-backward-compatibility` and `no-cli` (all now the default behaviour), so they were dropped from the template. Phase 0 (14), the TURN checks and all e2e tests were re-run on the new images and pass.
+
+Totals: 100 unit, 55 integration, 15 browser e2e, 14 Phase 0.
+
 ## Deviations and decisions
 
 | # | Playbook said | Built | Why |
@@ -160,7 +175,7 @@ Also: assets without a GitHub digest are hashed locally and wait for admin appro
 | D8 | (not specified) | `/vdo/` refuses top-level navigation, sends `X-Frame-Options: SAMEORIGIN` and `Access-Control-Allow-Origin: *` | Same finding as D7. |
 | D9 | `autostart` for screen share | No `autostart` for screen share in production | `getDisplayMedia` needs a click inside the iframe on real browsers. |
 | D10 | uvicorn `--forwarded-allow-ips=<PROXY_IP>` | Router trusts the edge proxy IP (`set_real_ip_from`); uvicorn trusts only the router's fixed Docker IP | The app's direct peer is the router, not the edge proxy. |
-| D12 | Nightly `pg_dump` via cron in the worker | Separate `backup` service on the `postgres:16.10-alpine` image | Debian bookworm's `pg_dump` is v15 and refuses a v16 server; the postgres image always matches. |
+| D12 | Nightly `pg_dump` via cron in the worker | Separate `backup` service on the `postgres:16.15-alpine` image | Debian bookworm's `pg_dump` is v15 and refuses a v16 server; the postgres image always matches. |
 | D13 | Certbot DNS-01 (provider unspecified) | `certbot/dns-cloudflare:v5.8.0` | "DNS only, never proxied" implies Cloudflare. Swap the image and plugin if the zone is elsewhere. coturn restarts on the first certificate and reloads (SIGUSR2) on renewals. |
 | D14 | (not specified) | Docker network dynamic addresses limited to `172.31.250.128/25` | Stops dynamic containers taking the router's fixed address. |
 | D15 | Data model as listed | Added `users.must_change_password`, `join_codes.id`, `join_codes.created_at`, `join_codes.revoked`, `rustdesk_releases.error`, status `archived` | Needed for admin password resets, code revocation and sync error reporting. |
@@ -176,6 +191,8 @@ Also: assets without a GitHub digest are hashed locally and wait for admin appro
 | D25 | Event list | Added `session.access_granted` (admin gives a tech access) and `session.unshared` | Needed to audit those actions distinctly. |
 | D26 | Windows exe named `rustdesk-host=<HOST>,key=<KEY>.exe` | `rustdesk-host=<HOST>,key=<KEY>[,relay=<RELAY>],.exe` | The trailing comma is RustDesk's own final delimiter (1.5.0 `custom_server.rs`), so a "(1)" from a duplicate download doesn't break the key. Commas and `\ / : * ? " < > |` also trigger the fallback. |
 | D27 | (not specified) | 32-bit Windows (sciter), SUSE rpm, flatpak, armv7 Linux and the unattended Wayland build are not mirrored | Keeps the mirror to supported, current builds. Add rules to `ASSET_RULES` if needed. |
+| D28 | Use the upstream images | Thin hardened wrappers in `images/` (security updates; postgres and certbot flattened) | Trivy acceptance check; nothing functional changes. |
+| D29 | (not specified) | `/admin/health` cannot read container status (the app has no Docker socket, on purpose); it probes each service instead | Giving the app the Docker socket would be root on the LXC. |
 | D11 | Docker Hub images | Same official images; this build container pulled them via `mirror.gcr.io` because of Docker Hub rate limits | No effect on the LXC. |
 
 ## Decisions recorded

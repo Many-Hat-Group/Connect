@@ -18,6 +18,9 @@ for sm in vendor/vdo.ninja vendor/websocket_server; do
     echo "check-vendor: $sm has local changes (vendored code must never be edited):"; echo "$dirty" | head -20; fail=1
   fi
   echo "check-vendor: $sm $(git -C "$sm" describe --tags --always 2>/dev/null) $actual"
+  if ! grep -q "commit: $actual" app/content/licences.yaml; then
+    echo "check-vendor: app/content/licences.yaml does not list $sm commit $actual (update the /licences page)"; fail=1
+  fi
 done
 [ "$fail" -eq 0 ] && echo "check-vendor: OK"
 exit "$fail"

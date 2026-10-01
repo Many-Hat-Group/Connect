@@ -161,10 +161,16 @@ def test_kill_tears_down_customer_and_old_token_fails(browser, base_url):
 
 def test_one_portal_websocket_per_page(browser, base_url):
     ctx, page, _ = tech_page(browser, base_url, USED)
-    sockets = []
-    page.on("websocket", lambda ws: sockets.append(ws.url))
+    open_now = set()
+
+    def on_ws(ws):
+        if ws.url.endswith("/ws/portal"):
+            open_now.add(ws)
+            ws.on("close", lambda w: open_now.discard(w))
+    page.on("websocket", on_ws)
     page.goto(base_url + "/portal")
     page.wait_for_timeout(2000)
-    assert [u for u in sockets if u.endswith("/ws/portal")] == [f"wss://{base_url.split('://')[1]}/ws/portal"]
+    # Concurrent connections, not opens: a reconnect after a drop is fine.
+    assert len(open_now) == 1
     assert page.locator(".sound-prompt").count() == 1
     ctx.close()

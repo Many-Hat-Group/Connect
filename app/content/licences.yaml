@@ -1,0 +1,40 @@
+# Third-party software shown on /licences. scripts/check-vendor.sh fails if
+# the pinned commits here drift from the vendor/ submodules.
+components:
+  - name: VDO.Ninja
+    role: Screen and camera sharing engine (served unmodified at /vdo/)
+    version: v30.2
+    commit: d5a8b5669d1cb0ff75f984499f7025b745657808
+    licence: GNU AGPL-3.0 (the file webrtc.js carries its own "All Rights Reserved" header and is served unmodified)
+    source: https://github.com/steveseguin/vdo.ninja/tree/v30.2
+  - name: VDO.Ninja handshake server (vdoninja_advanced.js)
+    role: Signalling server
+    version: "92d9bce"
+    commit: 92d9bce4f8c798b520cfd2781d6f7f8ae607b3fb
+    licence: GNU AGPL-3.0
+    source: https://github.com/steveseguin/websocket_server/tree/92d9bce4f8c798b520cfd2781d6f7f8ae607b3fb
+  - name: coturn
+    role: TURN relay server
+    version: 4.18.0
+    licence: BSD 3-Clause
+    source: https://github.com/coturn/coturn/tree/4.18.0
+  - name: RustDesk
+    role: Remote control client (installers mirrored unmodified from GitHub releases)
+    version: dynamic
+    licence: GNU AGPL-3.0
+    source: https://github.com/rustdesk/rustdesk
+  - name: htmx
+    role: Portal page interactions
+    version: 2.0.11
+    licence: Zero-Clause BSD
+    source: https://github.com/bigskysoftware/htmx/tree/v2.0.11
+  - name: Python libraries
+    role: Application server (FastAPI, Uvicorn, SQLAlchemy, Alembic, asyncpg, redis-py, Jinja2, argon2-cffi, pyotp, cryptography, qrcode, httpx, defusedxml, PyYAML)
+    version: see requirements.lock
+    licence: MIT, BSD and Apache-2.0 (each package's own licence)
+    source: https://pypi.org/
+  - name: nginx, PostgreSQL, Redis, Node.js, certbot
+    role: Router, database, cache, signalling runtime, certificates (official container images)
+    version: nginx 1.30.5, PostgreSQL 16.15, Redis 7.4.11, Node.js 22.23.3, certbot 5.8.0
+    licence: BSD 2-Clause (nginx), PostgreSQL Licence, BSD 3-Clause (Redis 7.4), MIT (Node.js), Apache-2.0 (certbot)
+    source: https://hub.docker.com/

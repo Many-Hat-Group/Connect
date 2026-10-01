@@ -1,0 +1,28 @@
+{% extends "portal/layout.html" %}
+{% block title %}Settings{% endblock %}
+{% block content %}
+{% include "admin/_settings_nav.html" %}
+<h1>Settings</h1>
+{% if saved %}<p class="alert ok" role="status">Settings saved.</p>{% endif %}
+{% if errors %}<div class="alert error" role="alert"><ul>{% for e in errors.values() %}<li>{{ e }}</li>{% endfor %}</ul></div>{% endif %}
+<form method="post" action="/admin/settings" class="stack settings-form">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  {% for group, title in [('timeouts', 'Timeouts'), ('limits', 'Limits'), ('retention', 'Retention'), ('rustdesk', 'RustDesk updates')] %}
+  <fieldset><legend>{{ title }}</legend>
+    {% for section, key, label, lo, hi, unit in fields if section == group %}
+    {% set name = section ~ '.' ~ key %}
+    <label>{{ label }} ({{ unit }})
+      <input type="number" name="{{ name }}" min="{{ lo }}" max="{{ hi }}" value="{{ (form[name] if form else st[section][key]) }}" required {% if name in errors %}aria-invalid="true"{% endif %}>
+    </label>
+    {% endfor %}
+  </fieldset>
+  {% endfor %}
+  <fieldset><legend>TURN and RustDesk servers</legend>
+    <label>TURN host name <input name="turn.host" value="{{ form['turn.host'] if form else st.turn.host }}" required></label>
+    <label>RustDesk ID server (hbbs) <input name="rustdesk.host" value="{{ form['rustdesk.host'] if form else st.rustdesk.host }}"></label>
+    <label>RustDesk public key <input name="rustdesk.key" value="{{ form['rustdesk.key'] if form else st.rustdesk.key }}" spellcheck="false"></label>
+    <label>RustDesk relay (hbbr, if different) <input name="rustdesk.relay" value="{{ form['rustdesk.relay'] if form else st.rustdesk.relay }}"></label>
+  </fieldset>
+  <button class="btn primary" type="submit">Save settings</button>
+</form>
+{% endblock %}
