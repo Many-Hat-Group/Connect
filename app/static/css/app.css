@@ -193,3 +193,9 @@ label.check { flex-direction: row; align-items: center; gap: .5rem; font-weight:
 dialog { border: 1px solid var(--border); border-radius: var(--radius); max-width: 460px; }
 dialog::backdrop { background: rgba(0,0,0,.4); }
 @media (max-width: 1000px) { .session-view { grid-template-columns: 1fr; } }
+.share-menu { position: relative; }
+.share-menu summary { list-style: none; }
+.share-menu summary::-webkit-details-marker { display: none; }
+.share-body { position: absolute; right: 0; bottom: 3.2rem; width: 340px; z-index: 20; display: flex; flex-direction: column; gap: .6rem; }
+.access-list { margin: 0; padding-left: 1.1rem; font-size: .9rem; }
+.filters { margin-bottom: 1rem; }

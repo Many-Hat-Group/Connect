@@ -109,6 +109,18 @@ Bugs found and fixed by these tests: IP block stored a UUID in Redis (500 on Kil
 
 Totals: 74 unit, 30 integration, 10 browser e2e (plus 14 Phase 0).
 
+### Phase 5: Sharing, invites, admin oversight (2026-10-01)
+
+| Acceptance check | Result | Evidence |
+|---|---|---|
+| Permission matrix: tech B gets 404 for tech A's private session over REST and websocket. Sees it after `all_techs` or an accepted invite. Loses it after the invite is revoked | PASS | `tests/integration/test_phase5_permissions.py`: 10 REST endpoints and the session page all 404 for B (B's End and Kill change nothing); websocket presence marking and update fan-out both refused; access after share-all and after accept; lost again after unshare and after revoke (B's view and signal tokens are removed too); pending and declined invites give no access |
+| Admin can join, transfer and share any session, and each action is audited | PASS | `test_admin_join_transfer_and_grant_audited`: admin sees all sessions and joins (`session.admin_joined`), transfers (old owner loses access, `session.transferred`), grants a third tech (`session.access_granted`), shares with all (`session.shared_all`); techs cannot transfer or grant; `/admin/sessions` admin-only |
+| Invite toast appears on the target tech's dashboard within 2 s | PASS | `tests/e2e/test_phase5_invites.py`: toast under 2 s, Accept opens the session with video, inviter told, customer sees both names, revoke closes the target's view |
+
+Also: "Click to enable sounds" prompt on every portal page (one per page, tested), tab title flashes with the unread count while the tab is hidden, notifications panel keeps a history with action buttons.
+
+Known limitation: revoking access removes the tech's views, signal tokens and closes their viewer, but an already-established peer-to-peer media connection is closed by their own page; a tampered browser could keep it until it drops. Kill ends it for everyone. Techs are trusted staff, so this is acceptable for now.
+
 ## Deviations and decisions
 
 | # | Playbook said | Built | Why |
@@ -136,6 +148,7 @@ Totals: 74 unit, 30 integration, 10 browser e2e (plus 14 Phase 0).
 | D22 | Framerate path to be decided in Phase 4 | Framerate goes to the customer page, which posts VDO.Ninja's Companion command `{action: "videoConstraint", value: "frameRate", value2: N}` to its own frame | `applyConstraints` on the live track: no reload, no second screen pick. Applies to every viewer of that stream. |
 | D23 | Thumbnails pause when hidden | The thumbnail viewer is closed (not just paused) when the tab is hidden, the tile scrolls out of view, or the same tech opens the full view | Zero bytes and zero customer upload for an unseen thumbnail; reconnects in about 1 s. |
 | D24 | Balanced: up to 1080p | Viewer asks for at most 1920x1080 (`targetWidth`/`targetHeight`); Clear and Smooth use `scale` 100 and 50 | v30.2 iframe API. |
+| D25 | Event list | Added `session.access_granted` (admin gives a tech access) and `session.unshared` | Needed to audit those actions distinctly. |
 | D11 | Docker Hub images | Same official images; this build container pulled them via `mirror.gcr.io` because of Docker Hub rate limits | No effect on the LXC. |
 
 ## Decisions recorded

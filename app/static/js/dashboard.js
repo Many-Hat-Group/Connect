@@ -80,7 +80,7 @@ function scheduleRefresh() {
 }
 
 onMessage((m) => {
-  if (m.type === "session.update") scheduleRefresh();
+  if (m.type === "session.update" || m.type === "access.revoked") scheduleRefresh();
   if (m.type === "view.full") {
     if (m.open) { fullOpen.add(m.stream_id); closeThumb(m.stream_id); } else { fullOpen.delete(m.stream_id); syncThumbs(); }
   }

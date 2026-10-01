@@ -49,6 +49,7 @@ function connect() {
     try { msg = JSON.parse(e.data); } catch { return; }
     if (msg.type === "session.revoked") { location.href = "/login"; return; }
     if (msg.notify) notify(msg.notify);
+    if (msg.type === "invite.received") inviteToast(msg);
     handlers.forEach((fn) => { try { fn(msg); } catch (err) { console.error(err); } });
   });
   ws.addEventListener("close", (e) => {
@@ -103,6 +104,24 @@ function flashTitle(text) {
 document.addEventListener("visibilitychange", () => {
   if (!document.hidden && titleTimer) { clearInterval(titleTimer); titleTimer = null; document.title = baseTitle; }
 });
+
+// ---------------------------------------------------------------- invites
+function inviteToast(m) {
+  const respond = (action) => async () => {
+    try {
+      const r = await api("POST", `/api/invites/${m.access_id}/${action}`);
+      if (action === "accept" && r) location.href = `/portal/session/${r.session_id}`;
+    } catch (e) {
+      notify({ title: "Invite no longer available", body: e.message, panel: false });
+    }
+  };
+  notify({
+    title: `${m.from} invited you to a session`,
+    body: `${m.customer || "Customer"}${m.company ? " (" + m.company + ")" : ""}`,
+    sticky: true,
+    actions: [{ label: "Accept", primary: true, onClick: respond("accept") }, { label: "Decline", onClick: respond("decline") }],
+  });
+}
 
 // ---------------------------------------------------------------- toasts
 export function notify(n) {

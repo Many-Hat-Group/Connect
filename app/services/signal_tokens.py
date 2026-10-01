@@ -22,6 +22,8 @@ async def issue(session_id: str, role: str, subject: str) -> str:
         p.set(_key(token), f"{session_id}|{role}|{subject}", ex=TTL)
         p.sadd(f"signal:sess:{session_id}", token)
         p.expire(f"signal:sess:{session_id}", TTL)
+        p.sadd(f"signal:sessuser:{session_id}:{subject}", token)
+        p.expire(f"signal:sessuser:{session_id}:{subject}", TTL)
         await p.execute()
     return token
 
@@ -38,3 +40,14 @@ async def revoke_session(session_id: str) -> None:
     if tokens:
         await r.delete(*[_key(t) for t in tokens])
     await r.delete(f"signal:sess:{session_id}")
+
+
+async def revoke_user(session_id: str, subject: str) -> None:
+    """Revoke the signal tokens one participant holds for a session."""
+    r = redis()
+    key = f"signal:sessuser:{session_id}:{subject}"
+    tokens = await r.smembers(key)
+    if tokens:
+        await r.delete(*[_key(t) for t in tokens])
+        await r.srem(f"signal:sess:{session_id}", *tokens)
+    await r.delete(key)

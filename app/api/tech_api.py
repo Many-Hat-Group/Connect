@@ -207,3 +207,91 @@ async def kill_session(request: Request, session_id: str, body: dict = Body(defa
     block = st["limits"]["kill_block_seconds"] if body.get("block_ip") else 0
     await sessions.end(db, s, "tech_killed", Actor.user(user), ip=client_ip(request), block_ip_seconds=block)
     return {"ok": True, "blocked": bool(block)}
+
+
+# ---------------------------------------------------------------- sharing (Phase 5)
+
+from ..services import access as access_svc  # noqa: E402
+
+
+def _access_error(e: access_svc.AccessError) -> JSONResponse:
+    return err(e.status, e.message)
+
+
+@router.get("/techs")
+async def techs(user: User = Depends(require_user), db: AsyncSession = Depends(get_db)):
+    rows = (await db.scalars(select(User).where(User.is_active.is_(True), User.id != user.id)
+                             .order_by(User.display_name))).all()
+    return [{"id": str(u.id), "name": u.display_name, "role": u.role} for u in rows]
+
+
+@router.get("/sessions/{session_id}/access")
+async def get_access(session_id: str, user: User = Depends(require_user), db: AsyncSession = Depends(get_db)):
+    s = await permissions.load_session_for(db, user, session_id)
+    return {"visibility": s.visibility, "owner_id": str(s.owner_id), "entries": await access_svc.access_list(db, s),
+            "can_admin": permissions.can_admin(user)}
+
+
+@router.post("/sessions/{session_id}/share-all", dependencies=[Depends(csrf_protect)])
+async def share_all(request: Request, session_id: str, body: dict = Body(default={}),
+                    user: User = Depends(require_user), db: AsyncSession = Depends(get_db)):
+    s = await permissions.load_session_for(db, user, session_id, need="manage")
+    if body.get("off"):
+        await access_svc.unshare(db, s, user, client_ip(request))
+    else:
+        await access_svc.share_all(db, s, user, client_ip(request))
+    await db.commit()
+    return {"ok": True, "visibility": s.visibility}
+
+
+@router.post("/sessions/{session_id}/invite", dependencies=[Depends(csrf_protect)])
+async def invite(request: Request, session_id: str, body: dict = Body(...), user: User = Depends(require_user),
+                 db: AsyncSession = Depends(get_db)):
+    s = await permissions.load_session_for(db, user, session_id, need="manage")
+    try:
+        a = await access_svc.invite(db, s, user, body.get("user_id"), client_ip(request))
+    except access_svc.AccessError as e:
+        return _access_error(e)
+    await db.commit()
+    return {"ok": True, "access_id": a.id}
+
+
+@router.post("/invites/{access_id}/{action}", dependencies=[Depends(csrf_protect)])
+async def invite_action(request: Request, access_id: int, action: str, user: User = Depends(require_user),
+                        db: AsyncSession = Depends(get_db)):
+    try:
+        if action in ("accept", "decline"):
+            a = await access_svc.respond(db, access_id, user, action == "accept", client_ip(request))
+            await db.commit()
+            return {"ok": True, "session_id": str(a.session_id)}
+        if action == "revoke":
+            await access_svc.revoke(db, access_id, user, client_ip(request))
+            await db.commit()
+            return {"ok": True}
+    except access_svc.AccessError as e:
+        return _access_error(e)
+    raise HTTPException(404)
+
+
+@router.post("/sessions/{session_id}/transfer", dependencies=[Depends(csrf_protect)])
+async def transfer(request: Request, session_id: str, body: dict = Body(...), user: User = Depends(require_user),
+                   db: AsyncSession = Depends(get_db)):
+    s = await permissions.load_session_for(db, user, session_id, need="admin")
+    try:
+        await access_svc.transfer(db, s, user, body.get("user_id"), client_ip(request))
+    except access_svc.AccessError as e:
+        return _access_error(e)
+    await db.commit()
+    return {"ok": True}
+
+
+@router.post("/sessions/{session_id}/grant", dependencies=[Depends(csrf_protect)])
+async def grant(request: Request, session_id: str, body: dict = Body(...), user: User = Depends(require_user),
+                db: AsyncSession = Depends(get_db)):
+    s = await permissions.load_session_for(db, user, session_id, need="admin")
+    try:
+        await access_svc.grant(db, s, user, body.get("user_id"), client_ip(request))
+    except access_svc.AccessError as e:
+        return _access_error(e)
+    await db.commit()
+    return {"ok": True}

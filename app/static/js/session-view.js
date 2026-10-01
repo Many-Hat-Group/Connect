@@ -3,6 +3,7 @@
 import { addVisible, api, notify, onMessage, viewClosed, viewOpened } from "./portal.js";
 import { Viewer } from "./viewer.js";
 import { deviceLabel, duration, el } from "./ui.js";
+import { initShareMenu } from "./share-menu.js";
 
 const root = document.getElementById("session-view");
 const sessionId = root.dataset.session;
@@ -204,8 +205,16 @@ function teardown() {
   side.clear();
 }
 
+let shareMenu = null;
+initShareMenu(document.getElementById("share-controls"), sessionId).then((m) => { shareMenu = m; });
+
 onMessage((m) => {
-  if (m.type === "session.update" && m.session_id === sessionId) load();
+  if (m.type === "session.update" && m.session_id === sessionId) { load(); if (shareMenu) shareMenu.render(); }
+  if (m.type === "access.revoked" && m.session_id === sessionId) {
+    teardown();
+    statusLine.textContent = "You no longer have access to this session.";
+    setTimeout(() => { location.href = "/portal"; }, 3000);
+  }
 });
 window.addEventListener("pagehide", () => {
   const ids = [[selected, "full"], ...[...side.keys()].map((s) => [s, "thumb"])];
