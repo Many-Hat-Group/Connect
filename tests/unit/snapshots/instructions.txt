@@ -1,0 +1,220 @@
+## screen/windows/chrome
+# Share your screen (Windows)
+- Press the green Select screen to share button.
+- In the window that opens, choose the Entire screen tab.
+- Click the picture of your screen.
+- Tick Also share system audio if you want your technician to hear sound from your computer.
+- Click Share.
+audio: Sound from your computer is shared if you ticked Also share system audio.
+
+## screen/windows/edge
+# Share your screen (Windows)
+- Press the green Select screen to share button.
+- In the window that opens, choose the Entire screen tab.
+- Click the picture of your screen.
+- Tick Also share system audio if you want your technician to hear sound from your computer.
+- Click Share.
+audio: Sound from your computer is shared if you ticked Also share system audio.
+
+## screen/windows/opera
+# Share your screen (Windows)
+- Press the green Select screen to share button.
+- In the window that opens, choose the Entire screen tab.
+- Click the picture of your screen.
+- Tick Also share system audio if you want your technician to hear sound from your computer.
+- Click Share.
+audio: Sound from your computer is shared if you ticked Also share system audio.
+
+## screen/windows/firefox
+# Share your screen (Windows, Firefox)
+- Press the green Select screen to share button.
+- In the box at the top of the window, choose Entire screen (or the screen you want).
+- Click Allow.
+audio: Firefox can&#39;t share sound from your computer. Your technician will see your screen but won&#39;t hear it.
+
+## screen/windows/default
+# Share your screen (Windows)
+- Press the green Select screen to share button.
+- In the window that opens, choose the Entire screen tab.
+- Click the picture of your screen.
+- Tick Also share system audio if you want your technician to hear sound from your computer.
+- Click Share.
+audio: Sound from your computer is shared if you ticked Also share system audio.
+
+## screen/macos/chrome
+# Share your screen (Mac)
+- Press the green Select screen to share button.
+- Choose the Entire screen tab, click the picture of your screen, then click Share.
+- If you see a message about Screen Recording, open System Settings, then Privacy and Security, then Screen and System Audio Recording (called Screen Recording on older versions), and turn your browser on.
+- Your Mac will ask you to quit and reopen the browser. Do that, then open this page again. You won&#39;t need a new code.
+audio: On a Mac, sound can usually only be shared from a single Chrome tab. If your technician needs to hear something, ask them how best to do it.
+note: The first time you share your screen on a Mac you have to give your browser permission. This is a normal Mac security step.
+
+## screen/macos/edge
+# Share your screen (Mac)
+- Press the green Select screen to share button.
+- Choose the Entire screen tab, click the picture of your screen, then click Share.
+- If you see a message about Screen Recording, open System Settings, then Privacy and Security, then Screen and System Audio Recording (called Screen Recording on older versions), and turn your browser on.
+- Your Mac will ask you to quit and reopen the browser. Do that, then open this page again. You won&#39;t need a new code.
+audio: On a Mac, sound can usually only be shared from a single Chrome tab. If your technician needs to hear something, ask them how best to do it.
+note: The first time you share your screen on a Mac you have to give your browser permission. This is a normal Mac security step.
+
+## screen/macos/opera
+# Share your screen (Mac)
+- Press the green Select screen to share button.
+- Choose the Entire screen tab, click the picture of your screen, then click Share.
+- If you see a message about Screen Recording, open System Settings, then Privacy and Security, then Screen and System Audio Recording (called Screen Recording on older versions), and turn your browser on.
+- Your Mac will ask you to quit and reopen the browser. Do that, then open this page again. You won&#39;t need a new code.
+audio: On a Mac, sound can usually only be shared from a single Chrome tab. If your technician needs to hear something, ask them how best to do it.
+note: The first time you share your screen on a Mac you have to give your browser permission. This is a normal Mac security step.
+
+## screen/macos/firefox
+# Share your screen (Mac, Firefox)
+- Press the green Select screen to share button.
+- In the box at the top of the window, choose the screen you want, then click Allow.
+- If you see a message about Screen Recording, open System Settings, then Privacy and Security, then Screen and System Audio Recording, and turn Firefox on.
+- Quit and reopen Firefox when asked, then open this page again. You won&#39;t need a new code.
+audio: Firefox can&#39;t share sound. Your technician will see your screen but won&#39;t hear it.
+
+## screen/macos/safari
+# Share your screen (Mac, Safari)
+- Press the green Select screen to share button.
+- Safari asks whether to share a window or your whole screen. Choose Share Entire Screen (or the window your technician asked for), then click Allow.
+- If you see a message about Screen Recording, open System Settings, then Privacy and Security, then Screen and System Audio Recording, and turn Safari on. Quit and reopen Safari when asked.
+audio: Safari can&#39;t share sound. Your technician will see your screen but won&#39;t hear it.
+
+## screen/macos/default
+# Share your screen (Mac)
+- Press the green Select screen to share button.
+- Choose the Entire screen tab, click the picture of your screen, then click Share.
+- If you see a message about Screen Recording, open System Settings, then Privacy and Security, then Screen and System Audio Recording (called Screen Recording on older versions), and turn your browser on.
+- Your Mac will ask you to quit and reopen the browser. Do that, then open this page again. You won&#39;t need a new code.
+audio: On a Mac, sound can usually only be shared from a single Chrome tab. If your technician needs to hear something, ask them how best to do it.
+note: The first time you share your screen on a Mac you have to give your browser permission. This is a normal Mac security step.
+
+## screen/linux/chrome
+# Share your screen (Linux)
+- Press the green Select screen to share button.
+- Choose Entire screen, click the picture of your screen, then click Share.
+- On some Linux desktops (Wayland) a second window from your system appears. Pick the screen there and click Share.
+audio: Sound can only be shared from a single Chrome tab on Linux.
+
+## screen/linux/firefox
+# Share your screen (Linux, Firefox)
+- Press the green Select screen to share button.
+- Choose the screen you want in the box at the top, then click Allow.
+- On some Linux desktops (Wayland) a second window from your system appears. Pick the screen there and click Share.
+audio: Firefox can&#39;t share sound. Your technician will see your screen but won&#39;t hear it.
+
+## screen/linux/default
+# Share your screen (Linux)
+- Press the green Select screen to share button.
+- Choose the screen you want and confirm.
+audio: Sound might not be shared from Linux.
+
+## screen/chromeos/chrome
+# Share your screen (Chromebook)
+- Press the green Select screen to share button.
+- Choose Entire screen, click the picture of your screen, then click Share.
+audio: If you see a Share system audio switch, turn it on so your technician can hear sound.
+
+## screen/chromeos/default
+# Share your screen (Chromebook)
+- Press the green Select screen to share button.
+- Choose Entire screen, click the picture of your screen, then click Share.
+audio: If you see a Share system audio switch, turn it on so your technician can hear sound.
+
+## screen/android/chrome
+# Share your screen (Android)
+- Press the green Select screen to share button.
+- When your phone asks, choose to share your entire screen, then tap Start now.
+- To stop, come back here and press Stop sharing, or use the notification at the top of your screen.
+audio: Sound might not be shared from Android.
+
+## screen/android/default
+# Share your screen (Android)
+- Press the green Select screen to share button.
+- When your phone asks, choose to share your entire screen, then tap Start now.
+- To stop, come back here and press Stop sharing, or use the notification at the top of your screen.
+audio: Sound might not be shared from Android.
+
+## screen/ios/default
+# Screen sharing isn&#39;t available on iPhone and iPad
+- Screen sharing from a web browser isn&#39;t possible on iPhone or iPad.
+- You can share your camera instead, so your technician can see what you&#39;re looking at.
+unavailable
+
+## screen/default/default
+# Share your screen
+- Press the green Select screen to share button.
+- Choose your whole screen in the box your browser shows, then confirm.
+audio: Your browser might not be able to share sound.
+
+## camera/ios/safari
+# Share your camera (iPhone or iPad)
+- When asked, tap Allow so this page can use your camera and microphone.
+- Point the camera at what your technician needs to see. Use the camera button to switch between front and back cameras.
+- If you tapped Don&#39;t Allow by mistake, open Settings, then Safari, then Camera, choose Ask or Allow, and reload this page.
+audio: Your technician can hear you through your microphone.
+
+## camera/ios/chrome
+# Share your camera (iPhone or iPad)
+- When asked, tap Allow so this page can use your camera and microphone.
+- Point the camera at what your technician needs to see.
+- If you tapped Don&#39;t Allow by mistake, open Settings, then Chrome, and turn on Camera and Microphone. Then reload this page.
+audio: Your technician can hear you through your microphone.
+
+## camera/ios/default
+# Share your camera (iPhone or iPad)
+- When asked, tap Allow so this page can use your camera and microphone.
+- Point the camera at what your technician needs to see. Use the camera button to switch between front and back cameras.
+- If you tapped Don&#39;t Allow by mistake, open Settings, then Safari, then Camera, choose Ask or Allow, and reload this page.
+audio: Your technician can hear you through your microphone.
+
+## camera/android/default
+# Share your camera (Android)
+- When asked, tap Allow (or While using the app) for the camera and microphone.
+- Point the camera at what your technician needs to see.
+- If you blocked the camera by mistake, tap the icon next to the web address, open Permissions, allow Camera and Microphone, then reload this page.
+audio: Your technician can hear you through your microphone.
+
+## camera/macos/safari
+# Share your camera (Mac, Safari)
+- When asked, click Allow for the camera and microphone.
+- If you blocked it by mistake, open Safari, then Settings, then Websites, choose Camera and Microphone, set this site to Allow, then reload the page.
+audio: Your technician can hear you through your microphone.
+
+## camera/macos/default
+# Share your camera
+- When your browser asks, click Allow for the camera and microphone.
+- Point the camera at what your technician needs to see.
+- If you blocked it by mistake, click the camera or lock icon next to the web address, allow Camera and Microphone, then reload this page.
+audio: Your technician can hear you through your microphone.
+
+## camera/windows/default
+# Share your camera
+- When your browser asks, click Allow for the camera and microphone.
+- Point the camera at what your technician needs to see.
+- If you blocked it by mistake, click the camera or lock icon next to the web address, allow Camera and Microphone, then reload this page.
+audio: Your technician can hear you through your microphone.
+
+## camera/linux/default
+# Share your camera
+- When your browser asks, click Allow for the camera and microphone.
+- Point the camera at what your technician needs to see.
+- If you blocked it by mistake, click the camera or lock icon next to the web address, allow Camera and Microphone, then reload this page.
+audio: Your technician can hear you through your microphone.
+
+## camera/chromeos/default
+# Share your camera
+- When your browser asks, click Allow for the camera and microphone.
+- Point the camera at what your technician needs to see.
+- If you blocked it by mistake, click the camera or lock icon next to the web address, allow Camera and Microphone, then reload this page.
+audio: Your technician can hear you through your microphone.
+
+## camera/default/default
+# Share your camera
+- When your browser asks, click Allow for the camera and microphone.
+- Point the camera at what your technician needs to see.
+- If you blocked it by mistake, click the camera or lock icon next to the web address, allow Camera and Microphone, then reload this page.
+audio: Your technician can hear you through your microphone.

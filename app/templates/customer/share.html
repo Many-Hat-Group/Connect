@@ -1,0 +1,39 @@
+{% extends "customer/layout.html" %}
+{% block title %}Sharing with {{ brand.company_name }}{% endblock %}
+{% block main_class %}container wide customer-share{% endblock %}
+{% block content %}
+<script type="application/json" id="page-data">{{ page_data|safe }}</script>
+<div class="share-layout">
+  <section class="share-main" aria-label="Sharing">
+    <div class="status-bar" id="status-bar" role="status" aria-live="polite">
+      <span id="status-text">Getting ready</span>
+      <span id="viewers-text" class="viewers"></span>
+    </div>
+    <div class="alert" id="warning" hidden role="alert"></div>
+    <div id="frames" class="frames"></div>
+    <div class="share-actions">
+      <button type="button" class="btn" id="share-again" hidden>Share again</button>
+      <button type="button" class="btn" id="add-screen" hidden>Share another screen</button>
+      <button type="button" class="btn" id="stop-sharing" hidden>Stop sharing</button>
+      <form method="post" action="/s/end" id="end-form" class="inline">
+        <button type="submit" class="btn danger" id="end-session">End session</button>
+      </form>
+    </div>
+  </section>
+  <aside class="share-help" aria-label="Instructions">
+    <h2 id="instr-title">{{ entry.title }}</h2>
+    <ol id="instr-steps">{% for step in entry.steps %}<li>{{ step }}</li>{% endfor %}</ol>
+    <p id="instr-audio" class="muted">{{ entry.audio or '' }}</p>
+    <p id="instr-note" class="muted">{{ entry.note or '' }}</p>
+    {% if s.share_type == 'screen' %}<p class="small"><a href="/camera" id="camera-instead" hidden>Share your camera instead</a></p>{% endif %}
+    <p class="small">Need help? Call {{ brand.support_phone }}.</p>
+  </aside>
+</div>
+<div id="ended" class="ended" hidden>
+  <h1>Session ended</h1>
+  <p id="ended-message"></p>
+  <p>You can close this page.</p>
+</div>
+<div id="modal-root"></div>
+{% endblock %}
+{% block scripts %}<script type="module" src="/static/js/customer-share.js?v={{ static_v }}"></script>{% endblock %}

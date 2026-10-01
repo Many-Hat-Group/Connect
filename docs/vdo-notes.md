@@ -55,6 +55,13 @@ All events are `{action, value, UUID?, streamID?}`. We pass `iframetarget` (empt
 
 Commands we use: `{close:true}` (hang up), `{volume:x}`, `{mute:bool}`, `{scale:N}`, `{bitrate:kbps}` (0 pauses video), `{getStats:true}`, `{getDetailedState:true}`, `{action:"togglescreenshare"}` (there is no dedicated stop-screen-share command).
 
+## Customer publisher frames (Phase 3)
+
+- Screen: `screenshare`, **no** `autostart`, `audiodevice=0` (hides the extra microphone panel and keeps the mic out of the mix), `systemaudio=include` on the first screen, `ssvo` (video only) on extra screens. The customer presses VDO.Ninja's own green **Select screen to share** button, which gives the frame the user activation `getDisplayMedia` needs. The button pulses, so Playwright clicks it with `force=True`.
+- Camera: `webcam` + `autostart` (getUserMedia needs no click; the browser shows its permission prompt).
+- `audio_available`: v30.2 has no publisher-side audio event, so the customer page reads its own frame's local tracks (`session.streamSrc` / `session.screenStream`) **read-only** after `seeding`, and again 2.5 s later. The tech viewer's `new-audio-track-added` is the backup. Nothing is written to VDO.Ninja.
+- The customer page's Permissions-Policy must allow `camera`, `microphone` and `display-capture` for `self`, otherwise the frame gets `NotAllowedError`.
+
 ## Ending a session
 
 Removing the publisher iframe from the DOM ends every capture track (`readyState === "ended"`) and the viewer receives `end-view-connection` (verified). The customer page does this when the app says the session ended. `{close:true}` is sent first for a clean hang-up.

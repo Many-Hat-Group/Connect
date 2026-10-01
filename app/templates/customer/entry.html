@@ -1,0 +1,33 @@
+{% extends "customer/layout.html" %}
+{% block title %}Enter your code{% endblock %}
+{% block content %}
+<h1>{% if share_type == 'camera' %}Share your camera{% elif share_type == 'screen' %}Share your screen{% else %}Enter your details{% endif %}</h1>
+{% include "customer/_warning.html" %}
+{% if error %}<p class="alert error" role="alert" id="form-error">{{ error }}</p>{% endif %}
+<p class="muted" id="no-screen-note" hidden>Screen sharing isn't available on this device. You can share your camera instead.</p>
+<form method="post" action="/start" class="stack" id="entry-form" novalidate>
+  <input type="hidden" name="ccsrf" value="{{ ccsrf }}">
+  <fieldset class="code-field">
+    <legend>Your 4-letter code</legend>
+    <div class="code-boxes" id="code-boxes">
+      {% for i in range(4) %}<input name="code" class="code-box" maxlength="1" autocomplete="off" autocapitalize="characters" spellcheck="false" inputmode="text" aria-label="Letter {{ i + 1 }}" value="{{ code[i] if code|length > i else '' }}" required>{% endfor %}
+    </div>
+    <p class="hint" id="code-hint" aria-live="polite">Codes never use the letters I, L or O.</p>
+  </fieldset>
+  <label>Your name <input name="name" value="{{ form.name or '' }}" autocomplete="name" maxlength="120" required></label>
+  <label>Company <input name="company" value="{{ form.company or '' }}" autocomplete="organization" maxlength="160" required></label>
+  <label>Ticket number (if you have one) <input name="ticket" value="{{ form.ticket or '' }}" maxlength="60"></label>
+  {% if share_type %}
+  <input type="hidden" name="share_type" value="{{ share_type }}">
+  <button type="submit" class="btn primary big">Continue</button>
+  {% if share_type == 'screen' %}<p class="small"><a href="/camera">Share your camera instead</a></p>{% else %}<p class="small" id="screen-alt"><a href="/screen">Share your screen instead</a></p>{% endif %}
+  {% else %}
+  <div class="choices">
+    <button type="submit" name="share_type" value="screen" class="btn primary big" id="choose-screen">Share my screen</button>
+    <button type="submit" name="share_type" value="camera" class="btn big" id="choose-camera">Share my camera</button>
+  </div>
+  {% endif %}
+</form>
+{% include "customer/_privacy.html" %}
+{% endblock %}
+{% block scripts %}<script type="module" src="/static/js/customer-entry.js?v={{ static_v }}"></script>{% endblock %}

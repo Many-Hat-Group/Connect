@@ -109,3 +109,40 @@ label.check { flex-direction: row; align-items: center; gap: .5rem; font-weight:
   .nav { gap: .7rem; font-size: .95rem; }
   .codes { columns: 1; }
 }
+
+/* ---------------------------------------------------------------- customer */
+.customer-main h1 { font-size: 1.7rem; }
+.warning-box { border-left: 6px solid var(--brand-accent); }
+.choices { display: flex; flex-direction: column; gap: 1rem; margin: 1.5rem 0; }
+.choices .btn { width: 100%; }
+.code-field { border: 0; padding: 0; }
+.code-field legend { font-weight: 600; margin-bottom: .4rem; }
+.code-boxes { display: flex; gap: .6rem; }
+.code-box { width: 3.6rem; height: 4.2rem; text-align: center; font-size: 2rem; font-weight: 700; text-transform: uppercase;
+  font-family: ui-monospace, Consolas, monospace; }
+.hint { font-size: .9rem; color: var(--muted); margin: .4rem 0 0; }
+.hint.bad { color: var(--err); font-weight: 600; }
+.small { font-size: .9rem; }
+.privacy { margin-top: 1.5rem; color: var(--muted); }
+.privacy summary { cursor: pointer; color: var(--brand-primary); }
+.share-layout { display: grid; grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr); gap: 1.2rem; align-items: start; }
+.status-bar { display: flex; justify-content: space-between; flex-wrap: wrap; gap: .5rem; background: var(--surface);
+  border: 1px solid var(--border); border-radius: var(--radius); padding: .7rem 1rem; font-weight: 600; margin-bottom: .8rem; }
+.viewers { color: var(--ok); }
+.frames { display: grid; gap: .8rem; }
+.frame-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.frame-label { padding: .3rem .7rem; font-size: .85rem; font-weight: 600; background: #eef0f3; }
+.frame-wrap iframe { display: block; width: 100%; height: min(70vh, 560px); border: 0; background: #e8eaee; }
+.share-actions { display: flex; flex-wrap: wrap; gap: .8rem; margin-top: 1rem; }
+.share-help { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.2rem; }
+.share-help h2 { margin-top: 0; }
+.share-help ol { padding-left: 1.2rem; }
+.share-help li { margin-bottom: .5rem; }
+.ended { text-align: center; padding: 3rem 1rem; }
+.modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: flex; align-items: center; justify-content: center; z-index: 60; padding: 1rem; }
+.modal { background: var(--surface); border-radius: var(--radius); max-width: 560px; width: 100%; max-height: 90vh; overflow: auto; padding: 1.2rem 1.4rem; }
+@media (max-width: 800px) {
+  .share-layout { grid-template-columns: 1fr; }
+  .frame-wrap iframe { height: 60vh; }
+  .code-box { width: 3.2rem; height: 3.8rem; }
+}

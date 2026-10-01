@@ -47,7 +47,9 @@ def app_csp() -> str:
             "frame-src 'self'; frame-ancestors 'self'; form-action 'self'; base-uri 'none'; object-src 'none'")
 
 
-CAPTURE_PATHS = ("/screen", "/camera", "/join", "/s/", "/start")  # customer pages that frame the publisher
+# Customer pages that frame the publisher and need camera/mic/screen capture.
+CAPTURE_EXACT = {"/", "/screen", "/camera", "/s", "/start"}
+CAPTURE_PREFIX = ("/join/", "/s/")
 
 
 class SecurityHeaders(BaseHTTPMiddleware):
@@ -60,7 +62,7 @@ class SecurityHeaders(BaseHTTPMiddleware):
         h["X-Frame-Options"] = "SAMEORIGIN"
         h["Cross-Origin-Opener-Policy"] = "same-origin"
         path = request.url.path
-        if path == "/" or path.startswith(CAPTURE_PATHS):
+        if path in CAPTURE_EXACT or path.startswith(CAPTURE_PREFIX):
             h["Permissions-Policy"] = ("camera=(self), microphone=(self), display-capture=(self), "
                                        "autoplay=(self), fullscreen=(self), geolocation=(), payment=(), usb=()")
         else:

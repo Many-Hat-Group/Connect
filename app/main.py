@@ -12,11 +12,12 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy import text
 
 from . import db, rds
-from .api import admin_users, auth_routes, portal_routes, setup_routes
+from .api import admin_users, auth_routes, customer_routes, portal_routes, setup_routes, tech_api
 from .config import APP_DIR
 from .services import settings as settings_svc
 from .services import signal_tokens
 from .web import Redirect, SecurityHeaders, redirect, render
+from .ws import customer as customer_ws
 from .ws import portal as portal_ws
 from .ws.hub import hub
 
@@ -85,7 +86,8 @@ def create_app() -> FastAPI:
         ok = await signal_tokens.validate(token)
         return Response(status_code=204 if ok else 403)
 
-    for r in (auth_routes.router, setup_routes.router, admin_users.router, portal_routes.router, portal_ws.router):
+    for r in (auth_routes.router, setup_routes.router, admin_users.router, portal_routes.router, tech_api.router,
+              customer_routes.router, portal_ws.router, customer_ws.router):
         app.include_router(r)
     return app
 

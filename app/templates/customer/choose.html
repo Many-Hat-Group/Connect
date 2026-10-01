@@ -1,0 +1,14 @@
+{% extends "customer/layout.html" %}
+{% block title %}Get help{% endblock %}
+{% block content %}
+<h1>Show your technician what you see</h1>
+<p>Your technician will give you a 4-letter code. Nothing needs to be installed.</p>
+{% include "customer/_warning.html" %}
+<div class="choices">
+  <a class="btn primary big" href="/screen" id="choose-screen">Share my screen</a>
+  <p class="muted" id="no-screen-note" hidden>Screen sharing isn't available on this device. You can share your camera instead.</p>
+  <a class="btn big" href="/camera" id="choose-camera">Share my camera</a>
+</div>
+{% include "customer/_privacy.html" %}
+{% endblock %}
+{% block scripts %}<script type="module" src="/static/js/customer-entry.js?v={{ static_v }}"></script>{% endblock %}

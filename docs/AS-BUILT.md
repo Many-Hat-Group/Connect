@@ -77,6 +77,20 @@ Also covered: TOTP replay rejected, single-use recovery codes, session id rotati
 
 Totals: 28 unit, 20 integration, 2 browser e2e.
 
+### Phase 3: Customer flow (2026-10-01)
+
+| Acceptance check | Result | Evidence |
+|---|---|---|
+| E2E: customer enters a valid code and details, shares (fake media), the session goes to `live` and `audio_available` is recorded | PASS | `tests/e2e/test_phase3_customer.py::test_screen_share_goes_live_and_records_audio` (customer presses VDO.Ninja's own Select screen to share button inside the frame) |
+| Bad, expired and used codes give the same response. Sixth failure from an IP is locked out and audited | PASS | `tests/integration/test_phase3_customer.py::test_bad_expired_and_used_codes_look_identical` (same status and message), `test_sixth_failure_from_ip_is_locked_and_audited` (5 failures lock the IP; the right code is then refused; `code.failed_attempt` x5 and `code.ip_locked`); global alert `test_global_bruteforce_banner` |
+| On a simulated iPhone UA and missing `getDisplayMedia`, Share Screen is hidden and camera works | PASS | `test_iphone_gets_camera_only` (session recorded as ios/safari/camera, live) |
+| Ending from the customer side releases the capture (track `readyState` is `ended`) and the session ends with `customer_ended` | PASS | same screen test: every captured track `ended`, `end_reason = customer_ended`, old customer token refused |
+| Instructions render for every key in the YAML (snapshot test) | PASS | `tests/unit/test_phase3_units.py::test_instructions_snapshot` (30 keys, `tests/unit/snapshots/instructions.txt`; also checks no dash punctuation) and `test_required_combinations_resolve` |
+
+Also: customer token cookie `__Host-connect-cust` (HttpOnly, Secure, SameSite=Strict), double-submit CSRF plus origin check on the entry form, `/join/ABCD` prefill, letters I, L and O rejected in the code boxes with a hint, UA and Client Hints detection (iPadOS spotted by touch points), WCAG AA contrast for the fixed palette (all pairs 5.7:1 or better), phone layout checked at 390 px.
+
+Totals so far: 74 unit, 27 integration, 5 browser e2e (plus 14 Phase 0).
+
 ## Deviations and decisions
 
 | # | Playbook said | Built | Why |
@@ -98,6 +112,9 @@ Totals: 28 unit, 20 integration, 2 browser e2e.
 | D16 | (not specified) | Brand colours are served as `/brand.css` (CSS variables) | Lets the strict CSP forbid inline styles. |
 | D17 | Server-side sessions | Also used before login (stage `anon`) to hold the login CSRF token | CSRF on the login and wizard forms. |
 | D18 | Wizard "disabled once the first admin exists" | Token step disabled when an admin exists; the remaining wizard steps (branding, URLs, TURN, RustDesk) are open only to that signed-in admin until setup is marked complete | The wizard has to continue after the admin is created. |
+| D19 | Publisher reports `audio_available` via the iframe API | Read-only check of the same-origin publisher frame's own local tracks (`session.streamSrc` / `session.screenStream`), with the tech viewer's `new-audio-track-added` as backup | v30.2 has no publisher-side audio event. Nothing in VDO.Ninja is modified or written. |
+| D20 | (not specified) | Screen share frames use `audiodevice=0` (no microphone panel or mic mix) and `systemaudio=include` for the first screen; later screens use `ssvo` (video only) | Clean customer UI; audio only from the first stream. |
+| D21 | Ending removes the iframe | `{close:true}` is sent first, then the frame is removed | Clean hang-up for the viewer, then every capture track ends. |
 | D11 | Docker Hub images | Same official images; this build container pulled them via `mirror.gcr.io` because of Docker Hub rate limits | No effect on the LXC. |
 
 ## Decisions recorded
