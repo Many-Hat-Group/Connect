@@ -1,5 +1,7 @@
 # Connect: runbook
 
+First install: see `docs/DEPLOY-LXC.md`.
+
 All commands run on the LXC as root from `/opt/connect`.
 
 ## Everyday
